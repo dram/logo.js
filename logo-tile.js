@@ -430,6 +430,11 @@ globals.ProtoTile = globals.Tile.extend({
         this.set_background(color, 5)
     },
 
+    drop_cb: function (overlap) {
+    },
+})
+
+globals.UserWordTile = globals.ProtoTile.extend({
     click_cb: function () {
         if (this.expr.type == 'APPLY') {
             var  words = globals.user_defined_words
@@ -441,7 +446,7 @@ globals.ProtoTile = globals.Tile.extend({
                     to_expr.hide = !to_expr.hide
             }
         }
-    },
+    }
 })
 
 globals.RunTile = globals.Tile.extend({
@@ -1123,7 +1128,7 @@ globals.UserWordPanel = globals.Tile.extend({
                 nil.parent = expr
                 expr.args.push(nil)
             }
-            var tile = new globals.ProtoTile(expr, '#C1CC25')
+            var tile = new globals.UserWordTile(expr, '#C1CC25')
             tile.translate(0, y)
             y += tile.bounds.height + 10
             if (to_expr.hide)
