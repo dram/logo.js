@@ -692,10 +692,10 @@ globals.ListTile = globals.Tile.extend({
             blank.bounds.size.divide(2).add(new paper.Point(0, y)))
         this.add_child(blank)
 
+        this.set_background('#DCE8EB', 5)
+
 	if (expr.parent.type == 'LIST')
             this.set_background('#F7F9FE', 5)
-	else
-            this.set_background('#DCE8EB', 5)
 
 	/* List is not draggable if it is a block of a to expression. */
 	if (expr.parent.type == 'TO')
