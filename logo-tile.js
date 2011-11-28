@@ -574,9 +574,6 @@ globals.SpeedTile = globals.Tile.extend({
 
         this.set_background('#CBDBE0', 5)
     },
-
-    click_cb: function (expr) {
-    },
 })
 
 globals.NumberTile = globals.Tile.extend({
