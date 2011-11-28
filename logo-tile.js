@@ -1229,8 +1229,6 @@ traits.SourceCanvas = Self.trait([], {
 
     on_mouse_up: function (event) {
         var that = globals.source_canvas
-        var hit_expr = null
-        var to_be_delete = false
 
         that.main_layer.activate()
 
@@ -1276,6 +1274,28 @@ traits.SourceCanvas = Self.trait([], {
             globals.RunTile.prototype.click_cb()
             break
         }
+    },
+
+    on_mouse_move: function (event) {
+        var that = globals.source_canvas
+
+        var res = that.main_layer.hitTest(event.point, {
+            stroke: true,
+            fill: true,
+            tolerance: 0
+        })
+
+        var tile = null
+        if (res && res.type == 'center' && res.item)
+            tile = res.item
+
+	if (tile && tile.click_cb) {
+	    document.body.style.cursor = 'pointer'
+        } else if (tile && tile.drop_cb) {
+	    document.body.style.cursor = 'move'
+        } else {
+	    document.body.style.cursor = 'default'
+	}
     },
 
     on_frame: function (event) {
@@ -1341,6 +1361,7 @@ traits.SourceCanvas = Self.trait([], {
         tool.onMouseDown = this.on_mouse_down
         tool.onMouseDrag = this.on_mouse_drag
         tool.onMouseUp = this.on_mouse_up
+	tool.onMouseMove = this.on_mouse_move
         tool.onKeyDown = this.on_key_down
         paper.view.onFrame = this.on_frame
 
