@@ -295,7 +295,7 @@ Self.add_slot(traits.Expr, "tile", function () {
 globals.NewToTile = globals.Tile.extend({
     initialize: function () {
         this.base()
-        var name = new globals.Text(this.label('define'), '#FFFFF')
+        var name = new globals.Text(this.label('TO'), '#FFFFF')
         this.add_child(name)
         this.set_background('#F37C78', 5)
     },
@@ -418,7 +418,7 @@ globals.ProtoTile = globals.Tile.extend({
             label = this.label(expr.op)
             break
         case 'TO':
-            label = this.label('define')
+            label = this.label('TO')
             break
         }
 
@@ -845,7 +845,7 @@ globals.ToTile = globals.Tile.extend({
         var x = 0
 
         if (expr.name != globals.main_word_name) {
-            var to = new globals.Text(this.label('define'), "#91897E")
+            var to = new globals.Text(this.label('TO'), "#91897E")
 
             to.set_position(new paper.Point(x, 5))
 

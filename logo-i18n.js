@@ -18,7 +18,7 @@ globals.locale = (navigator.language || navigator.browserLanguage).toLowerCase()
 
 globals.tile_labels = {
     'zh-cn': {
-	'define': '定义',
+	'TO': '定义',
 	'list': '列表',
 	'number': '数值',
 	'start': '开始',
