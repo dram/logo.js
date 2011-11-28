@@ -696,6 +696,10 @@ globals.ListTile = globals.Tile.extend({
             this.set_background('#F7F9FE', 5)
 	else
             this.set_background('#DCE8EB', 5)
+
+	/* List is not draggable if it is a block of a to expression. */
+	if (expr.parent.type == 'TO')
+	    this.drop_cb = undefined
     },
 
     drop_cb: function (overlap) {
