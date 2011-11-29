@@ -27,6 +27,7 @@ globals.tile_labels = {
 	'continue': '继续',
 	'step': '单步',
 	'step(s) per second': '步/秒',
+	'source': '代码',
 	'forward': '前进',
 	'right': '右转',
 	'repeat': '重复',

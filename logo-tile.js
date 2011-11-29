@@ -558,6 +558,86 @@ globals.StepTile = globals.Tile.extend({
     },
 })
 
+globals.ViewSourceTile = globals.Tile.extend({
+    initialize: function () {
+        this.base()
+
+        var label = new globals.Text(this.label('source'), '#FFFFFF')
+
+        this.add_child(label)
+
+        this.set_background('#F37C78', 5)
+    },
+
+    create_source_textarea: function () {
+	var text, div
+
+	div = document.createElement('div')
+	div.id = "source"
+	div.visibility = "hidden"
+	div.style.margin = "auto"
+	div.style.background = "#DCE8EB"
+	div.style.left = "0"
+	div.style.right = "0"
+	div.style.top = "0"
+	div.style.bottom = "0"
+	div.style.position = "absolute"
+	div.style.width = "400px"
+	div.style.height = "350px"
+	div.style.textAlign = "center"
+
+	text = document.createElement('textarea')
+	text.style.color = "#333333"
+	text.style.font = "12pt Consolas"
+	text.style.border = "#DCE8EB 5px solid"
+	text.style.background = "#F7F9FE"
+	text.style.padding = "10px"
+	text.style.width = "400px"
+	text.style.height = "300px"
+	div.appendChild(text)
+
+	div.appendChild(document.createElement('br'))
+
+	var save = document.createElement('button')
+	save.innerHTML = this.label('Save')
+	save.style.color = "#333333"
+	save.style.margin = "10px"
+	save.style.border = "#F7F9FE 0px solid"
+	save.onclick = function () {
+	    var src = this.parentNode.firstChild.value
+	    globals.lang.import(src)
+	    this.parentNode.style.visibility = 'hidden'
+            globals.source_canvas.redraw()
+            paper.view.draw()
+	}
+	div.appendChild(save)
+
+	var cancel = document.createElement('button')
+	cancel.innerHTML = this.label('Cancel')
+	cancel.style.color = "#333333"
+	cancel.style.margin = "10px"
+	cancel.style.border = "#F7F9FE 0px solid"
+	cancel.onclick = function () {
+	    this.parentNode.style.visibility = 'hidden'
+	}
+	div.appendChild(cancel)
+
+	document.body.appendChild(div)
+
+	return div
+    },
+
+    click_cb: function (expr) {
+        var source
+
+	if (!(source = document.getElementById('source')))
+	    source = this.create_source_textarea()
+
+	source.firstChild.value = globals.lang.export(globals.expressions)
+        source.style.visibility = 'visible'
+    },
+})
+
 globals.SpeedTile = globals.Tile.extend({
     initialize: function () {
         this.base()
@@ -1022,6 +1102,13 @@ globals.ControllerPanel = globals.Tile.extend({
             this.add_child(tile)
             x += tile.bounds.width + 20
         }
+
+	x += 100
+
+	tile = new globals.ViewSourceTile()
+	tile.translate(x, 0)
+	this.add_child(tile)
+	x += tile.bounds.width + 20
 
         this.translate(globals.canvas.width / 2 - this.bounds.width / 2,
                        globals.canvas.height - this.bounds.height + 20)

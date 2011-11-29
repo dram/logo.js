@@ -869,6 +869,65 @@ traits.Lang = Self.trait([], {
             }
         }
     },
+
+    export_expr: function (expr) {
+	var src = ''
+
+	switch (expr.type) {
+	case 'TO':
+	    src += 'TO ' + expr.name
+	    src += ' ' + expr.arg_names.join(' ') + "\n"
+	    expr.block.data.forEach(function (e) {
+		src += "  " + globals.lang.export_expr(e)
+	    })
+	    src += "END\n"
+	    break
+	case 'APPLY':
+	    src += expr.name
+	    src += " " + expr.args.map(globals.lang.export_expr).join()
+	    src += "\n"
+	    break
+	case 'INFIX':
+	    if (expr.left.type != 'INFIX')
+		src += globals.lang.export_expr(expr.left)
+	    else
+		src += "(" + globals.lang.export_expr(expr.left) + ")"
+	    src += " " + expr.op + " "
+	    if (expr.right.type != 'INFIX')
+		src += globals.lang.export_expr(expr.right)
+	    else
+		src += "(" + globals.lang.export_expr(expr.right) + ")"
+	    break
+	case 'PAREN':
+	    src += "(" + globals.lang.export_expr(expr.expr) + ")"
+	    break
+	case 'NUMBER':
+	    src += expr.value
+	    break
+	case 'VARIABLE':
+	    src += expr.name
+	    break
+	default:
+	}
+
+	return src
+    },
+
+    export: function (expressions) {
+	var src = ""
+
+	expressions.forEach(function (expr) {
+	    src += globals.lang.export_expr(expr) + "\n"
+	})
+
+	return src
+    },
+
+    import: function (src) {
+        var tokens = globals.lang.tokenize(src)
+        var exprs = globals.lang.parse(tokens)
+        globals.expressions = exprs
+    }
 })
 
 prototypes.lang = Self.prototype(traits.Lang, {})
