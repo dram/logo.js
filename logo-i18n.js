@@ -40,6 +40,7 @@ globals.tile_labels = {
 	'name arg1 arg2': '名称 参数1 参数2',
 	'OK': '确定',
 	'Cancel': '取消',
+	'Save': '保存',
     }
 }[globals.locale]
 

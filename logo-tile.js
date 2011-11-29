@@ -591,9 +591,11 @@ globals.ViewSourceTile = globals.Tile.extend({
 	text.style.font = "12pt Consolas"
 	text.style.border = "#DCE8EB 5px solid"
 	text.style.background = "#F7F9FE"
+	text.style.overflow = "auto"
 	text.style.padding = "10px"
 	text.style.width = "400px"
 	text.style.height = "300px"
+	text.style.boxSizing = "border-box"
 	div.appendChild(text)
 
 	div.appendChild(document.createElement('br'))
