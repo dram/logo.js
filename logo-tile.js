@@ -588,7 +588,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 
 	text = document.createElement('textarea')
 	text.style.color = "#333333"
-	text.style.font = "12pt Consolas"
+	text.style.font = "11pt Consolas"
 	text.style.border = "#DCE8EB 5px solid"
 	text.style.background = "#F7F9FE"
 	text.style.overflow = "auto"

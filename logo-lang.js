@@ -875,12 +875,18 @@ traits.Lang = Self.trait([], {
 
 	switch (expr.type) {
 	case 'TO':
-	    src += 'TO ' + expr.name
+	    var to = 'to'
+	    var end = 'end'
+	    if (globals.keywords) {
+		to = globals.keywords['to'] || 'to'
+		end = globals.keywords['end'] || 'end'
+	    }
+	    src += to + ' ' + expr.name
 	    src += ' ' + expr.arg_names.join(' ') + "\n"
 	    expr.block.data.forEach(function (e) {
 		src += "  " + globals.lang.export_expr(e)
 	    })
-	    src += "END\n"
+	    src += end + "\n"
 	    break
 	case 'APPLY':
 	    src += expr.name
