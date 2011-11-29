@@ -244,10 +244,11 @@ globals.Tile = globals.HitGroup.extend({
 	    return false
 
 	/*
-	  Do not replace by a list, so that drag a tile to a list
-	  will only move it to the list.
+	  Do not replace by a list or word definition, so that drag a
+	  tile to a list will only move it to the list, and drag a
+	  tile to a word definition will no nothing.
 	*/
-	if (tile.expr.type === 'LIST')
+	if (tile.expr.type === 'LIST' || tile.expr.type === 'TO')
 	    return this.delete_self()
 
 	var parent = this.get_parent_expr()
