@@ -431,7 +431,13 @@ globals.ProtoTile = globals.Tile.extend({
         this.set_background(color, 5)
     },
 
-    drop_cb: function (overlap) {
+    clone: function () {
+	var tile = new globals.ProtoTile(this.expr, this.color)
+	tile.position = this.position
+	return tile
+    },
+
+    on_drag_end: function (overlap) {
     },
 })
 
@@ -666,11 +672,11 @@ globals.NumberTile = globals.Tile.extend({
         this.set_background('#F7F9FE', 1)
     },
 
-    overlap_cb: function (tile) {
+    on_drop: function (tile) {
         return this.replace_self(tile)
     },
 
-    drop_cb: function (overlap) {
+    on_drag_end: function (overlap) {
 	return this.replace_self(overlap)
     },
 
@@ -782,14 +788,14 @@ globals.ListTile = globals.Tile.extend({
 
 	/* List is not draggable if it is a block of a to expression. */
 	if (expr.parent.type == 'TO')
-	    this.drop_cb = undefined
+	    this.on_drag_end = undefined
     },
 
-    drop_cb: function (overlap) {
+    on_drag_end: function (overlap) {
 	return this.replace_self(overlap)
     },
 
-    overlap_cb: function (tile) {
+    on_drop: function (tile) {
         if (this.has_child(tile))
             return
 
@@ -824,20 +830,30 @@ globals.ApplyTile = globals.Tile.extend({
         this.set_background('#CBDBE0', 5)
     },
 
-    overlap_cb: function (tile) {
+    on_drop: function (tile) {
         return this.replace_self(tile)
     },
 
-    drop_cb: function (overlap) {
+    on_drag_end: function (overlap) {
 	return this.replace_self(overlap)
     }
 })
 
 globals.ToVariableTile = globals.Tile.extend({
     initialize: function (name) {
+	this.variable_name = name
         this.base(prototypes.variable.clone(name))
         this.add_child(new globals.Text(name, '#91897E'))
         this.set_background('#F7F9FE', 5)
+    },
+
+    clone: function () {
+	var tile = new globals.ToVariableTile(this.variable_name)
+	tile.position = this.position
+	return tile
+    },
+
+    on_drag_end: function (overlap) {
     },
 })
 
@@ -846,6 +862,7 @@ globals.ToVariableTile = globals.Tile.extend({
  */
 globals.ToNameTile = globals.Tile.extend({
     initialize: function (to_expr) {
+	this.to_expr = to_expr
         var name = to_expr.name
 
         var expr = prototypes.expr_apply.clone(name)
@@ -859,6 +876,12 @@ globals.ToNameTile = globals.Tile.extend({
 
         this.add_child(new globals.Text(name))
         this.set_background('#F7F9FE', 5)
+    },
+
+    clone: function () {
+	var tile = new globals.ToNameTile(this.to_expr)
+	tile.position = this.position
+	return tile
     },
 
     /**
@@ -903,7 +926,10 @@ globals.ToNameTile = globals.Tile.extend({
 
             return false
         }
-    }
+    },
+
+    on_drag_end: function (overlap) {
+    },
 })
 
 /**
@@ -981,14 +1007,13 @@ globals.VariableTile = globals.Tile.extend({
         this.set_background('#F7F9FE')
     },
 
-    drop_cb: function (overlap) {
+    on_drag_end: function (overlap) {
 	return this.replace_self(overlap)
     },
 
-    overlap_cb: function (tile) {
+    on_drop: function (tile) {
         return this.replace_self(tile)
     },
-
 })
 
 globals.NilTile = globals.Tile.extend({
@@ -998,11 +1023,11 @@ globals.NilTile = globals.Tile.extend({
         this.set_background('#F7F9FE')
     },
 
-    overlap_cb: function (tile) {
+    on_drop: function (tile) {
         return this.replace_self(tile)
     },
 
-    drop_cb: function (overlap) {
+    on_drag_end: function (overlap) {
 	return this.replace_self(overlap)
     }
 })
@@ -1041,11 +1066,11 @@ globals.InfixTile = globals.Tile.extend({
         this.set_background('#CBDBE0', 5)
     },
 
-    drop_cb: function (overlap) {
+    on_drag_end: function (overlap) {
 	return this.replace_self(overlap)
     },
 
-    overlap_cb: function (tile) {
+    on_drop: function (tile) {
         return this.replace_self(tile)
     },
 })
@@ -1269,56 +1294,41 @@ globals.SourcePanel = globals.Tile.extend({
 traits.SourceCanvas = Self.trait([], {
     on_mouse_down: function (event) {
         var that = globals.source_canvas
-
-	var tile = that.get_focus_tile(event)
-
-        var expr
-        if (tile && (expr = tile.expr)
-                && ((expr.parent && expr.parent.type != 'TO')
-                   || tile instanceof globals.ProtoTile
-                   || tile instanceof globals.ToVariableTile
-                   || tile instanceof globals.ToNameTile)) {
-            that.do_move = true
-            that.selected_tile = tile
-
-            if (tile.down_cb)
-                tile.down_cb()
-        } else {
-            that.do_move = false
-            that.selected_tile = null
-        }
-
-        that.dragged = false
+	that.drag_data = {}
     },
 
     on_mouse_drag: function (event) {
         var that = globals.source_canvas
 
-        that.dragged = true
+	if (!that.drag_data['start']) {
+	    var tile = that.get_focus_tile(event)
 
-        if (!that.do_move)
-            return
+	    if (!tile)
+		return
 
-        that.drag_layer.activate()
+            var expr = tile.expr
 
-        if (that.selected_tile instanceof globals.ProtoTile
-           && !that.selected_tile.duplicate) {
-            var obj = new globals.ProtoTile(
-                that.selected_tile.expr, that.selected_tile.color)
-            obj.position = event.point
-            obj.duplicate = true
-            that.selected_tile = obj
-        }
+	    if (tile instanceof globals.ProtoTile
+		|| tile instanceof globals.ToVariableTile
+		|| tile instanceof globals.ToNameTile) {
+		that.drag_data['start'] =  true
+		that.drag_data['tile'] = tile.clone()
+	    } else if (expr && expr.parent && expr.parent.type != 'TO') {
+		that.drag_data['start'] = true
+		that.drag_data['tile'] = tile
+	    }
 
-        var group = that.selected_tile
+	    if (that.drag_data['start']) {
+		that.drag_layer.activate()
+		that.drag_layer.addChild(that.drag_data['tile'])
+	    }
+	}
 
-        that.drag_layer.addChild(group)
-
-        if (group.drag_cb)
-            group.drag_cb()
-
-        group.position = group.position.add(event.delta)
-        group.opacity = 0.5
+	if (that.drag_data['start']) {
+	    var t = that.drag_data['tile']
+            t.position = t.position.add(event.delta)
+            t.opacity = 0.5
+	}
     },
 
     get_focus_tile: function (event) {
@@ -1341,28 +1351,25 @@ traits.SourceCanvas = Self.trait([], {
 
         that.main_layer.activate()
 
-        var overlap = that.get_focus_tile(event)
+        var focus = that.get_focus_tile(event)
 
-        if (!that.dragged) {
-            if (overlap && overlap.click_cb) {
-                overlap.click_cb()
-                that.redraw()
+        if (that.drag_data['start']) {
+            var source = that.drag_data['tile']
+	    if (source === focus)
+		return
+
+            if (source.on_drag_end)
+		source.on_drag_end(focus)
+
+            if (focus && focus.on_drop)
+		focus.on_drop(source)
+        } else {
+            if (focus && focus.click_cb) {
+                focus.click_cb()
             }
-        }
-
-        if (!that.do_move)
-            return
-
-        var tile = that.selected_tile
-
-        if (tile.drop_cb && tile !== overlap)
-            tile.drop_cb(overlap)
-
-        if (overlap && overlap.overlap_cb && tile !== overlap)
-            overlap.overlap_cb(tile)
+	}
 
         that.redraw()
-
     },
 
     on_key_down: function (event) {
@@ -1382,7 +1389,7 @@ traits.SourceCanvas = Self.trait([], {
 
 	if (tile && tile.click_cb) {
 	    document.body.style.cursor = 'pointer'
-        } else if (tile && tile.drop_cb) {
+        } else if (tile && tile.on_drag_end) {
 	    document.body.style.cursor = 'move'
         } else {
 	    document.body.style.cursor = 'default'
@@ -1483,8 +1490,6 @@ traits.SourceCanvas = Self.trait([], {
 })
 
 prototypes.source_canvas = Self.prototype(traits.SourceCanvas, {
-    do_move: false,
-    selected_tile: null,
     drag_layer: null,
     main_layer: null
 })

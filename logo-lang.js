@@ -136,7 +136,7 @@ traits.Variable = Self.trait([traits.Expr], {
 
     clone: function (name) {
         var obj = Self.clone(this)
-        obj.name = name
+        obj.name = name || this.name
         return obj
     },
 
