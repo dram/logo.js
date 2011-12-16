@@ -1270,24 +1270,19 @@ traits.SourceCanvas = Self.trait([], {
     on_mouse_down: function (event) {
         var that = globals.source_canvas
 
-        var res = paper.project.hitTest(event.point, {
-            stroke: true,
-            fill: true,
-            tolerance: 0
-        })
+	var tile = that.get_focus_tile(event)
 
         var expr
-        if (res && res.type == 'center' && res.item
-                && (expr = res.item.expr)
+        if (tile && (expr = tile.expr)
                 && ((expr.parent && expr.parent.type != 'TO')
-                   || res.item instanceof globals.ProtoTile
-                   || res.item instanceof globals.ToVariableTile
-                   || res.item instanceof globals.ToNameTile)) {
+                   || tile instanceof globals.ProtoTile
+                   || tile instanceof globals.ToVariableTile
+                   || tile instanceof globals.ToNameTile)) {
             that.do_move = true
-            that.selected_tile = res.item
+            that.selected_tile = tile
 
-            if (res.item.down_cb)
-                res.item.down_cb()
+            if (tile.down_cb)
+                tile.down_cb()
         } else {
             that.do_move = false
             that.selected_tile = null
