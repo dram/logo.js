@@ -1326,10 +1326,8 @@ traits.SourceCanvas = Self.trait([], {
         group.opacity = 0.5
     },
 
-    on_mouse_up: function (event) {
+    get_focus_tile: function (event) {
         var that = globals.source_canvas
-
-        that.main_layer.activate()
 
         var res = that.main_layer.hitTest(event.point, {
             stroke: true,
@@ -1337,9 +1335,18 @@ traits.SourceCanvas = Self.trait([], {
             tolerance: 0
         })
 
-        var overlap = null
         if (res && res.type == 'center' && res.item)
-            overlap = res.item
+            return res.item
+	else
+	    return null
+    },
+
+    on_mouse_up: function (event) {
+        var that = globals.source_canvas
+
+        that.main_layer.activate()
+
+        var overlap = that.get_focus_tile(event)
 
         if (!that.dragged) {
             if (overlap && overlap.click_cb) {
@@ -1376,17 +1383,7 @@ traits.SourceCanvas = Self.trait([], {
     },
 
     on_mouse_move: function (event) {
-        var that = globals.source_canvas
-
-        var res = that.main_layer.hitTest(event.point, {
-            stroke: true,
-            fill: true,
-            tolerance: 0
-        })
-
-        var tile = null
-        if (res && res.type == 'center' && res.item)
-            tile = res.item
+        var tile = globals.source_canvas.get_focus_tile(event)
 
 	if (tile && tile.click_cb) {
 	    document.body.style.cursor = 'pointer'
