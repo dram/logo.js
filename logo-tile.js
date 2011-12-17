@@ -1401,11 +1401,10 @@ traits.SourceCanvas = Self.trait([], {
     },
 
     on_frame: function (event) {
-        globals.time_passed += event.delta
-
         if (globals.steps && globals.running && !globals.paused) {
-            var steps = globals.steps.value
-            if (globals.time_passed > 1 / steps) {
+            globals.time_passed += event.delta
+
+            if (globals.time_passed > 1 / globals.steps.value) {
                 globals.drawing_layer.activate()
                 if (!globals.lang.step()) {
                     globals.running = false
