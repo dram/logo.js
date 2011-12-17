@@ -33,8 +33,41 @@ traits.Source = Self.trait([], {
     remove_expression: function (expr) {
         var index = this.expressions.indexOf(expr)
 
-        if (index != -1)
+        if (index != -1) {
             this.expressions.splice(index, 1)
+	    return
+	}
+
+	var parent = expr.parent
+
+	if (parent && parent.delete_child)
+            return parent.delete_child(expr)
+	else if (parent && parent.replace_child)
+	    return parent.replace_child(expr, prototypes.nil.clone())
+	else
+	    return false
+    },
+
+    replace_expression: function (old, nu) {
+	/* parent and child can not be displaced */
+	if (old.parent === nu || nu.parent === old)
+	    return false
+
+	/*
+	  Do not replace by a list or word definition, so that drag a
+	  tile to a list will only move it to the list, and drag a
+	  tile to a word definition will no nothing.
+	*/
+	if (nu.type === 'LIST' || nu.type === 'TO')
+	    return globals.source.remove_expression(old)
+
+	var parent = old.parent
+
+	if (parent && parent.replace_child) {
+	    return parent.replace_child(old, nu)
+	} else {
+	    return false
+	}
     },
 
     run: function () {
@@ -190,40 +223,10 @@ globals.Tile = globals.HitGroup.extend({
     },
 
     /**
-       add_child -- add a child tile and set parent_tile
+       add_child -- add a child tile
     */
     add_child: function (item) {
-	var res = this.addChild(item)
-	item.parent_tile = this
-	return res
-    },
-
-    /**
-       has_child -- test if `tile' is a child of me
-    */
-    has_child: function (tile) {
-	return this === tile.parent_tile
-    },
-
-    /**
-       has_sibling -- test if `tile' is a sibling of me
-    */
-    has_sibling: function (tile) {
-	return this.parent_tile === tile.parent_tile
-    },
-
-    /**
-       get_parent -- return the parent tile
-    */
-    get_parent: function () {
-	return this.parent_tile
-    },
-
-    /**
-       get_parent_expr -- return expr of the parent tile
-    */
-    get_parent_expr: function () {
-	return this.parent_tile.expr
+	return this.addChild(item)
     },
 
     /**
@@ -253,47 +256,15 @@ globals.Tile = globals.HitGroup.extend({
     },
 
     /**
-       delete_self -- try to remove self from parent tile
-    */
-    delete_self: function () {
-	var parent = this.get_parent_expr()
-
-	if (parent && parent.delete_child)
-            return parent.delete_child(this.expr)
-	else if (parent && parent.replace_child)
-	    return parent.replace_child(this.expr, prototypes.nil.clone())
-	else
-	    return false
-    },
-
-    /**
        replace_self -- try to replace self with a new tile
 
        Delete self if `tile' is null
     */
     replace_self: function (tile) {
 	if (!tile || !tile.expr)
-	    return this.delete_self()
-
-	/* parent and child can not be displaced */
-	if (this.has_child(tile) || tile.has_child(this))
-	    return false
-
-	/*
-	  Do not replace by a list or word definition, so that drag a
-	  tile to a list will only move it to the list, and drag a
-	  tile to a word definition will no nothing.
-	*/
-	if (tile.expr.type === 'LIST' || tile.expr.type === 'TO')
-	    return this.delete_self()
-
-	var parent = this.get_parent_expr()
-
-	if (parent && parent.replace_child) {
-	    return parent.replace_child(this.expr, tile.expr)
-	} else {
-	    return false
-	}
+	    return globals.source.remove_expression(this.expr)
+	else
+	    return globals.source.replace_expression(this.expr, tile.expr)
     }
 })
 
@@ -832,7 +803,7 @@ globals.ListTile = globals.Tile.extend({
     },
 
     on_drop: function (tile) {
-        if (this.has_child(tile))
+        if (tile.expr.parent === this.expr)
             return
 
         tile.expr.parent = this.expr
@@ -933,7 +904,7 @@ globals.ToNameTile = globals.Tile.extend({
 
         form.style.visibility = 'visible'
 
-        var expr = this.get_parent_expr()
+        var expr = this.to_expr
         input.value = expr.name
         for (var i = 0, l = expr.arg_names.length; i < l; ++i)
             input.value += ' ' + expr.arg_names[i].slice(1)
