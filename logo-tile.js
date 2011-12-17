@@ -1377,8 +1377,14 @@ traits.SourceCanvas = Self.trait([], {
 
         switch (event.key) {
         case 'enter':
-            globals.RunTile.prototype.click_cb()
+	    if (globals.running)
+		globals.StopTile.prototype.click_cb()
+	    else
+		globals.RunTile.prototype.click_cb()
             break
+	case 'space':
+	    globals.PauseTile.prototype.click_cb()
+	    break
         }
     },
 
