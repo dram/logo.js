@@ -918,22 +918,6 @@ traits.Lang = Self.trait([], {
 
 	return src
     },
-
-    export: function (expressions) {
-	var src = ""
-
-	expressions.forEach(function (expr) {
-	    src += globals.lang.export_expr(expr) + "\n"
-	})
-
-	return src
-    },
-
-    import: function (src) {
-        var tokens = globals.lang.tokenize(src)
-        var exprs = globals.lang.parse(tokens)
-        globals.expressions = exprs
-    }
 })
 
 prototypes.lang = Self.prototype(traits.Lang, {})

@@ -89,3 +89,10 @@ to main\n\
 polygon 5\n\
 end\n\
 main"
+
+globals.main_word_name = {
+    "zh-cn": "主程序",
+}[globals.locale]
+
+if (!globals.main_word_name)
+    globals.main_word_name = "main"

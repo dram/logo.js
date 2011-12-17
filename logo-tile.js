@@ -12,6 +12,42 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 "use strict"
 
+traits.Source = Self.trait([], {
+    expressions: null,
+
+    export: function () {
+	var src = ""
+
+	this.expressions.forEach(function (expr) {
+	    src += globals.lang.export_expr(expr) + "\n"
+	})
+
+	return src
+    },
+
+    import: function (src) {
+        var tokens = globals.lang.tokenize(src)
+        this.expressions = globals.lang.parse(tokens)
+    },
+
+    remove_expression: function (expr) {
+        var index = this.expressions.indexOf(expr)
+
+        if (index != -1)
+            this.expressions.splice(index, 1)
+    },
+
+    run: function () {
+        globals.lang.run_expr(this.expressions, globals.logger)
+    },
+
+    forEach: function (fn) {
+	this.expressions.forEach(fn)
+    }
+})
+
+globals.source = Self.prototype(traits.Source, { })
+
 /**
    Extend paper.PointText to add bounds support. Here we use a <span>
    to calculate text width and height.
@@ -376,7 +412,7 @@ globals.NewToTile = globals.Tile.extend({
                 return ':' + arg
             })
 
-            var exprs = globals.expressions
+            var exprs = globals.source.expressions
 
             var i = 0
             for (; i < exprs.length; ++i) {
@@ -474,7 +510,7 @@ globals.RunTile = globals.Tile.extend({
 
         globals.init_drawing_area()
         globals.running = true
-        globals.lang.run_expr(globals.expressions, globals.logger)
+	globals.source.run()
         paper.project.layers[0].activate()
     },
 })
@@ -557,7 +593,7 @@ globals.StepTile = globals.Tile.extend({
             globals.init_drawing_area()
             globals.running = true
             globals.paused = true
-            globals.lang.run_expr(globals.expressions, globals.logger)
+	    globals.source.run()
         }
 
         paper.project.layers[0].activate()
@@ -613,7 +649,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 	save.style.border = "#F7F9FE 0px solid"
 	save.onclick = function () {
 	    var src = this.parentNode.firstChild.value
-	    globals.lang.import(src)
+	    globals.source.import(src)
 	    this.parentNode.style.visibility = 'hidden'
             globals.source_canvas.redraw()
             paper.view.draw()
@@ -641,7 +677,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 	if (!(source = document.getElementById('source')))
 	    source = this.create_source_textarea()
 
-	source.firstChild.value = globals.lang.export(globals.expressions)
+	source.firstChild.value = globals.source.export()
         source.style.visibility = 'visible'
     },
 })
@@ -944,10 +980,7 @@ globals.ToDeleteTile = globals.Tile.extend({
     },
 
     click_cb: function () {
-        var index = globals.expressions.indexOf(this.expr)
-
-        if (index != -1)
-            globals.expressions.splice(index, 1)
+	globals.source.remove_expression(this.expr)
     }
 })
 
@@ -1232,7 +1265,7 @@ globals.UserWordPanel = globals.Tile.extend({
 
         globals.user_defined_words = []
 
-        globals.expressions.forEach (function (to_expr) {
+        globals.source.forEach (function (to_expr) {
             if (to_expr.type != 'TO')
                 return
 
@@ -1275,7 +1308,7 @@ globals.SourcePanel = globals.Tile.extend({
 
         var y = 20
 
-        globals.expressions.forEach (function (expr) {
+        globals.source.forEach (function (expr) {
             if (expr.type != 'TO' || expr.hide)
                 return
 
@@ -1437,19 +1470,6 @@ traits.SourceCanvas = Self.trait([], {
     },
 
     draw_source: function () {
-        if (!globals.expressions) {
-            var source = globals.sample
-            var tokens = globals.lang.tokenize(source)
-            var exprs = globals.lang.parse(tokens)
-            globals.expressions = exprs
-
-            for (var i = 0; i < exprs.length; ++i) {
-                /* got main word name here */
-                if (exprs[i].type == 'APPLY')
-                    globals.main_word_name = exprs[i].name
-            }
-        }
-
         globals.canvas = document.getElementById("canvas")
 
         globals.canvas.width = window.innerWidth - 30
@@ -1496,5 +1516,7 @@ prototypes.source_canvas = Self.prototype(traits.SourceCanvas, {
     drag_layer: null,
     main_layer: null
 })
+
+globals.source.import(globals.sample)
 
 globals.source_canvas = prototypes.source_canvas.clone()
