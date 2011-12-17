@@ -1299,8 +1299,11 @@ traits.SourceCanvas = Self.trait([], {
 
     on_mouse_drag: function (event) {
         var that = globals.source_canvas
+	var data = that.drag_data
 
-	if (!that.drag_data['start']) {
+	if (data.start) {
+            data.tile.translate(event.delta)
+	} else {
 	    var tile = that.get_focus_tile(event)
 
 	    if (!tile)
@@ -1311,23 +1314,18 @@ traits.SourceCanvas = Self.trait([], {
 	    if (tile instanceof globals.ProtoTile
 		|| tile instanceof globals.ToVariableTile
 		|| tile instanceof globals.ToNameTile) {
-		that.drag_data['start'] =  true
-		that.drag_data['tile'] = tile.clone()
+		data.start =  true
+		data.tile = tile.clone()
 	    } else if (expr && expr.parent && expr.parent.type != 'TO') {
-		that.drag_data['start'] = true
-		that.drag_data['tile'] = tile
+		data.start = true
+		data.tile = tile
 	    }
 
-	    if (that.drag_data['start']) {
+	    if (data.start) {
+		data.tile.opacity = 0.5
 		that.drag_layer.activate()
-		that.drag_layer.addChild(that.drag_data['tile'])
+		that.drag_layer.addChild(data.tile)
 	    }
-	}
-
-	if (that.drag_data['start']) {
-	    var t = that.drag_data['tile']
-            t.position = t.position.add(event.delta)
-            t.opacity = 0.5
 	}
     },
 
@@ -1353,8 +1351,8 @@ traits.SourceCanvas = Self.trait([], {
 
         var focus = that.get_focus_tile(event)
 
-        if (that.drag_data['start']) {
-            var source = that.drag_data['tile']
+        if (that.drag_data.start) {
+            var source = that.drag_data.tile
 	    if (source === focus)
 		return
 
