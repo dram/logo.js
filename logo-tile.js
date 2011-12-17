@@ -15,6 +15,25 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 traits.Source = Self.trait([], {
     expressions: null,
 
+    auto_save_list: [],
+
+    auto_save: function (src) {
+	this.auto_save_list.push(src)
+
+	if (this.auto_save_list.length > 1000)
+	    this.auto_save_list.splice(0, 1)
+    },
+
+    restore: function () {
+	if (this.auto_save_list.length <= 0) {
+	    return false
+	} else {
+	    var src = this.auto_save_list.pop()
+	    this.import(src)
+	    return true
+	}
+    },
+
     export: function () {
 	var src = ""
 
@@ -40,12 +59,15 @@ traits.Source = Self.trait([], {
 
 	var parent = expr.parent
 
-	if (parent && parent.delete_child)
+	if (parent && parent.delete_child) {
+	    this.auto_save(this.export())
             return parent.delete_child(expr)
-	else if (parent && parent.replace_child)
+	} else if (parent && parent.replace_child) {
+	    this.auto_save(this.export())
 	    return parent.replace_child(expr, prototypes.nil.clone())
-	else
+	} else {
 	    return false
+	}
     },
 
     replace_expression: function (old, nu) {
@@ -64,6 +86,7 @@ traits.Source = Self.trait([], {
 	var parent = old.parent
 
 	if (parent && parent.replace_child) {
+	    this.auto_save(this.export())
 	    return parent.replace_child(old, nu)
 	} else {
 	    return false
@@ -76,7 +99,7 @@ traits.Source = Self.trait([], {
 
     forEach: function (fn) {
 	this.expressions.forEach(fn)
-    }
+    },
 })
 
 globals.source = Self.prototype(traits.Source, { })
@@ -1389,6 +1412,12 @@ traits.SourceCanvas = Self.trait([], {
 	case 'space':
 	    globals.PauseTile.prototype.click_cb()
 	    break
+	case 'z':
+            if (event.modifiers.control) {
+		globals.source.restore()
+		globals.source_canvas.redraw()
+            }
+            break
         }
     },
 
