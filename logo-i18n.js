@@ -33,6 +33,7 @@ globals.tile_labels = {
 	'repeat': '重复',
 	'penup': '抬笔',
 	'pendown': '下笔',
+        "ifelse": "是否",
 	'+': '加',
 	'-': '减',
 	'*': '乘',
@@ -62,6 +63,8 @@ globals.keywords = {
 	"right": "右转",
 	"penup": "抬笔",
 	"pendown": "下笔",
+        "repeat": "重复",
+        "ifelse": "是否",
     }
 }[globals.locale]
 
@@ -81,12 +84,15 @@ globals.sample = {
 if (!globals.sample)
     globals.sample = "\
 to polygon :edge\n\
-forward :edge\n\
-right 90\n\
-polygon :edge + 5\n\
+  forward :edge\n\
+  right 90\n\
+  ifelse :edge < 100\n\
+  [ polygon :edge + 5 ]\n\
+  [ ]\n\
 end\n\
+\n\
 to main\n\
-polygon 5\n\
+  polygon 5\n\
 end\n\
 main"
 

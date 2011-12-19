@@ -49,7 +49,7 @@ globals.word_list = Self.clone(prototypes.word_list)
     word.name = 'lt'
     word.narg = 2
     word.func = function (n1, n2) {
-        return prototypes.number.clone(n1.value < n2.value)
+        return prototypes.boolean.clone(n1.value < n2.value)
     }
     globals.word_list.$add(word)
 
@@ -136,13 +136,17 @@ globals.word_list = Self.clone(prototypes.word_list)
     globals.word_list.$add(word)
 
     word = Self.clone(prototypes.prim_word)
-    word.name = 'if'
-    word.narg = 2
-    word.func = function (test, then, env) {
-        if (test.value)
-            return then.value(env)
-        else
-            return null
+    word.name = 'ifelse'
+    word.narg = 3
+    word.func = function (test, then_block, else_block, env, cont, expr) {
+        var cps = Self.clone(prototypes.cps)
+        cps.expr = expr
+
+        var block = test.value ? then_block : else_block
+
+        cps.next = function (c) { return block.value(env, c) }
+        cps.continuation = cont
+        return cps
     }
     globals.word_list.$add(word)
 })()

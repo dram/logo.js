@@ -79,9 +79,13 @@ traits.Expr = Self.trait([], {
             } else {
                 cps.continuation = function (r) {
                     list[idx] = r
-                    var cps = traits.ExprApply.eval_list(list, env, final_cont)
-                    /* skip one step */
-                    return cps.step()
+                    var t = traits.ExprApply.eval_list(list, env, final_cont)
+                    if (Self.get_trait(t) === traits.CPS) {
+                        /* skip one step */
+                        return t.step()
+                    } else {
+                        return final_cont(t)
+                    }
                 }
             }
             return cps
@@ -100,9 +104,22 @@ prototypes.nil = Self.prototype(traits.Nil, { })
 
 traits.Boolean = Self.trait([], {
     type: 'BOOLEAN',
+
+    toString: function () { return 'BOOLEAN' },
+
+    eval: function (env) { return this },
+
+    clone: function (value) {
+        var obj = Self.clone(this)
+	if (value || value === 0)
+            obj.value = value
+        return obj
+    }
 })
 
-prototypes.boolean = Self.prototype(traits.Boolean, { })
+prototypes.boolean = Self.prototype(traits.Boolean, {
+    value: null
+})
 
 traits.Number = Self.trait([traits.Expr], {
     type: 'NUMBER',

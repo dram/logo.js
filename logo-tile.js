@@ -1222,6 +1222,7 @@ globals.PrototypePanel = globals.Tile.extend({
         var words = [ [this.label('forward'), [prototypes.number.clone(0)]]
 		      , [this.label('right'), [prototypes.number.clone(0)]]
 		      , [this.label('repeat'), [prototypes.number.clone(0), prototypes.list.clone(0)]]
+		      , [this.label('ifelse'), [prototypes.nil.clone(0), prototypes.list.clone(0), prototypes.list.clone(0)]]
 		      , [this.label('penup'), []]
 		      , [this.label('pendown'), []]
 		    ]
