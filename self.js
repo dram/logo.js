@@ -16,16 +16,22 @@ var Self = {}
 
 Self.clone = function (obj)
 {
-    var nu = Object.create(Object.getPrototypeOf(obj), {})
+    if (typeof (obj) !== "object") {
+        return obj
+    } else if (Array.isArray(obj)) {
+        return obj.concat()
+    } else {
+        var nu = Object.create(Object.getPrototypeOf(obj), {})
 
-    Object.getOwnPropertyNames(obj).forEach(function (name) {
-        Object.defineProperty(
+        Object.getOwnPropertyNames(obj).forEach(function (name) {
+            Object.defineProperty(
                 nu,
                 name,
                 Object.getOwnPropertyDescriptor(obj, name))
-    })
+        })
 
-    return nu
+        return nu
+    }
 }
 
 Self.add_child = function (obj, child)
@@ -62,7 +68,10 @@ Self.prototype = function (trait, props)
 
 Self.get_trait = function (obj)
 {
-    return Object.getPrototypeOf(obj)
+    if (typeof obj !== "object" || obj === null)
+        return undefined
+    else
+        return Object.getPrototypeOf(obj)
 }
 
 Self.add_slot = function (obj, name, val)

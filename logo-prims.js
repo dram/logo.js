@@ -140,12 +140,13 @@ globals.word_list = Self.clone(prototypes.word_list)
     word.narg = 3
     word.func = function (test, then_block, else_block, env, cont, expr) {
         var cps = Self.clone(prototypes.cps)
-        cps.expr = expr
 
         var block = test.value ? then_block : else_block
 
         cps.next = function (c) { return block.value(env, c) }
+        cps.expr = expr
         cps.continuation = cont
+
         return cps
     }
     globals.word_list.$add(word)

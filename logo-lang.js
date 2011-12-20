@@ -15,20 +15,34 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 window.traits = {}
 window.prototypes = {}
 
+/*
+  A CPS object have two attributes, NEXT and CONTINUATION. Everytime a
+  CPS is executed, NEXT is called with its CONTINUATION as an
+  argument, and it will return a value or another CPS.
+
+  If NEXT is an atomic action, it will return a value directly, else
+  if it have to call another CPS, than its own CONTINUATION should be
+  passed through and return a new CPS will be returned.
+
+  CONTINUATION always return a CPS or a marker indicates that has
+  reach the end.
+*/
 traits.CPS = Self.trait([], {
     step: function () {
+        if (this.continuation === this.marker)
+            return null
+
         var r = this.next(this.continuation)
-        if (r && Self.get_trait(r) === traits.CPS)
+
+        if (Self.get_trait(r) === traits.CPS)
             return r
-        else {
-            if (this.continuation === this.marker)
-                return r
-            else
-                return this.continuation(r)
-        }
+        else if (r === this.marker)
+            return null
+        else
+            return this.continuation(r)
     },
 
-    marker: function (r) { console.log('marker', r); return r }
+    marker: function (r) { console.log('marker'); return traits.CPS.marker }
 })
 
 prototypes.cps = Self.prototype(traits.CPS, {
@@ -38,58 +52,37 @@ prototypes.cps = Self.prototype(traits.CPS, {
 })
 
 traits.Expr = Self.trait([], {
-    eval_list: /* static */ function (list, env, final_cont) {
-        var idx = 0
+    eval_list_rec: function (data, env, final_cont) {
+        var cps
 
-        for (; idx < list.length; ++idx) {
-            if (!list[idx])
-                continue
-
-            if (list[idx].type == 'APPLY' || list[idx].type == 'INFIX') {
-                break
-            } else if (list[idx].type == 'VARIABLE' || list[idx].type == 'TO') {
-                list[idx] = list[idx].eval(env)
-            }
-        }
-
-        if (idx == list.length) {
-            var res = list.map(function (mem) {
-                var val = mem.eval(env)
-                if (!val) {
-                    if (Self.get_trait(mem) === traits.ExprVariable)
-                        throw prototypes.name_error.clone(mem.value)
-                    else
-                        throw prototypes.runtime_error.clone(mem)
-                }
-                return val
-            })
-
-            return res
+        if (data.idx >= data.list.length) {
+            return final_cont(data.list)
         } else {
-            var cps = Self.clone(prototypes.cps)
-            cps.expr = null
-            cps.next = function (c) {
-                return list[idx].eval(env, c)
-            }
-            if (idx == list.length - 1) {
+            var expr = data.list[data.idx]
+
+            if (expr.type == 'APPLY' || expr.type == 'INFIX') {
+                cps = Self.clone(prototypes.cps)
+                cps.expr = expr
+                cps.next = function (c) { return expr.eval(env, c) }
                 cps.continuation = function (r) {
-                    list[idx] = r
-                    return final_cont(list)
+                    data.list[data.idx] = r
+                    data.idx += 1
+                    return traits.Expr.eval_list_rec(data, env, final_cont)
                 }
             } else {
-                cps.continuation = function (r) {
-                    list[idx] = r
-                    var t = traits.ExprApply.eval_list(list, env, final_cont)
-                    if (Self.get_trait(t) === traits.CPS) {
-                        /* skip one step */
-                        return t.step()
-                    } else {
-                        return final_cont(t)
-                    }
-                }
+                if (expr.type == 'VARIABLE' || expr.type == 'TO')
+                    data.list[data.idx] = expr.eval(env)
+                data.idx += 1
+                cps = traits.Expr.eval_list_rec(data, env, final_cont)
             }
-            return cps
         }
+
+        return cps
+    },
+
+    eval_list: function (list, env, final_cont) {
+        var data = { list: Self.clone(list), idx: 0 }
+        return traits.Expr.eval_list_rec(data, env, final_cont)
     },
 })
 
@@ -111,7 +104,7 @@ traits.Boolean = Self.trait([], {
 
     clone: function (value) {
         var obj = Self.clone(this)
-	if (value || value === 0)
+	if (value !== undefined)
             obj.value = value
         return obj
     }
@@ -198,21 +191,7 @@ traits.List = Self.trait([traits.Expr], {
     },
 
     value: function (env, final_cont) {
-        var that = this
-        if (final_cont === traits.CPS.marker) {
-            var cont = function (r) {
-                var cps = Self.clone(prototypes.cps)
-                cps.expr = that
-                cps.next = function () { return r[r.length - 1] }
-                cps.continuation = final_cont
-                return cps
-            }
-        } else {
-            var cont = function (r) { return final_cont(r[r.length - 1]) }
-        }
-
-        var res = traits.Expr.eval_list(Self.clone(this.data), env, cont)
-        return res
+        return traits.Expr.eval_list(this.data, env, final_cont)
     },
 
     append: function (mem) {
@@ -298,53 +277,38 @@ traits.ExprApply = Self.trait([traits.Expr], {
     },
 
     eval_with_args: function (args, env, final_cont) {
-        var that = this
-
-        var evaled_args = traits.Expr.eval_list(
-            Self.clone(args),
-            env,
-            function (r) {
-                var cps = that.eval_with_args(r, env, final_cont)
-                return cps
-            }
-        )
-
-        if (Self.get_trait(evaled_args) === traits.CPS) {
-            /* skip one step */
-            return evaled_args.step()
-        }
-
-        var res = Self.clone(prototypes.cps)
-        res.expr = this
+        var cont = null
 
         var word = globals.word_list[this.name]
+        if (word.type === 'PRIMITIVE') {
+            var that = this
 
-        switch (word.type) {
-        case 'PRIMITIVE':
-            res.next = function (c) {
-                return word.func.apply(null, evaled_args.concat([env, c, that]))
+            cont = function (r) {
+                var res = word.func.apply(
+                    null, r.concat(env, final_cont, that))
+                if (Self.get_trait(res) === traits.CPS)
+                    return res
+                else
+                    return final_cont(res)
             }
-            break
-        case 'DEFINED':
-            res.next = function (c) {
+        } else {
+            cont = function (r) {
                 var new_env = Object.create(env, {})
                 var names = word.arg_names
-                for (var idx = 0; idx < names.length; ++idx)
-                    new_env[names[idx]] = evaled_args[idx]
+                for (var i = 0, l = names.length; i < l; ++i)
+                    new_env[names[i]] = r[i]
                 var cps = word.block.value(new_env, final_cont)
-                /* skip on step */
-                return cps.step()
+                return cps
             }
-            break
         }
 
-        res.continuation = final_cont
-
-        return res
+        return traits.Expr.eval_list(args, env, cont)
     },
 
     eval: function (env, final_cont) {
-        return this.eval_with_args(this.args, env, final_cont)
+        var cps = this.eval_with_args(this.args, env, final_cont)
+        cps.expr = cps.expr || this
+        return cps
     },
 
     replace_child: function (old, nu) {
@@ -820,24 +784,19 @@ traits.Lang = Self.trait([], {
 
         if (cps && Self.get_trait(cps) === traits.CPS) {
             globals.cps = cps.step()
-            globals.current_expression = globals.cps.expr
-            return true
-        } else {
-            return false
+            if (Self.get_trait(globals.cps) === traits.CPS) {
+                globals.current_expression = globals.cps.expr
+                return true
+            }
         }
+
+        return false
     },
 
     run_expr: function (exprs, logger) {
         try {
-            var cont = function (r) {
-                var cps = Self.clone(prototypes.cps)
-                cps.next = function () { return r[r.length - 1] }
-                cps.continuation = traits.CPS.marker
-                return cps
-            }
-
             var cps = traits.Expr.eval_list(
-                Self.clone(exprs), globals.globals, cont)
+                exprs, globals.globals, traits.CPS.marker)
 
             globals.cps = cps
         } catch (e) {
