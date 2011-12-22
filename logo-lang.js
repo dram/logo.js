@@ -28,10 +28,14 @@ window.prototypes = {}
   reach the end.
 */
 traits.CPS = Self.trait([], {
+    isCPS: function (obj) {
+        return Self.get_trait(obj) === traits.CPS
+    },
+
     step: function () {
         var r = this.next(this.continuation)
 
-        if (Self.get_trait(r) === traits.CPS)
+        if (traits.CPS.isCPS(r))
             return r
         else
             return this.continuation(r)
@@ -281,7 +285,7 @@ traits.ExprApply = Self.trait([traits.Expr], {
             cont = function (r) {
                 var res = word.func.apply(
                     null, r.concat(env, final_cont, that))
-                if (Self.get_trait(res) === traits.CPS)
+                if (traits.CPS.isCPS(res))
                     return res
                 else
                     return final_cont(res)
@@ -753,10 +757,10 @@ traits.Lang = Self.trait([], {
 
             var cps = expr.eval(env, traits.CPS.end_cont)
 
-            if (!cps || Self.get_trait(cps) !== traits.CPS)
+            if (!cps || traits.CPS.isCPS(cps))
                 continue
 
-            while ((cps = cps.step()) && Self.get_trait(cps) === traits.CPS)
+            while ((cps = cps.step()) && traits.CPS.isCPS(cps))
                 ;
         }
 
@@ -777,9 +781,9 @@ traits.Lang = Self.trait([], {
     step: function () {
         var cps = globals.cps
 
-        if (cps && Self.get_trait(cps) === traits.CPS) {
+        if (cps && traits.CPS.isCPS(cps)) {
             globals.cps = cps.step()
-            if (Self.get_trait(globals.cps) === traits.CPS) {
+            if (traits.CPS.isCPS(globals.cps)) {
                 globals.current_expression = globals.cps.expr
                 return true
             }
