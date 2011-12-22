@@ -24,25 +24,20 @@ window.prototypes = {}
   if it have to call another CPS, than its own CONTINUATION should be
   passed through and return a new CPS will be returned.
 
-  CONTINUATION always return a CPS or a marker indicates that has
+  CONTINUATION always return a CPS or a end_cont indicates that has
   reach the end.
 */
 traits.CPS = Self.trait([], {
     step: function () {
-        if (this.continuation === this.marker)
-            return null
-
         var r = this.next(this.continuation)
 
         if (Self.get_trait(r) === traits.CPS)
             return r
-        else if (r === this.marker)
-            return null
         else
             return this.continuation(r)
     },
 
-    marker: function (r) { console.log('marker'); return traits.CPS.marker }
+    end_cont: function (r) { console.log('end_cont'); return r }
 })
 
 prototypes.cps = Self.prototype(traits.CPS, {
@@ -756,7 +751,7 @@ traits.Lang = Self.trait([], {
         for (var i = 0; i < exprs.length; ++i) {
             var expr = exprs[i]
 
-            var cps = expr.eval(env, traits.CPS.marker)
+            var cps = expr.eval(env, traits.CPS.end_cont)
 
             if (!cps || Self.get_trait(cps) !== traits.CPS)
                 continue
@@ -796,7 +791,7 @@ traits.Lang = Self.trait([], {
     run_expr: function (exprs, logger) {
         try {
             var cps = traits.Expr.eval_list(
-                exprs, globals.globals, traits.CPS.marker)
+                exprs, globals.globals, traits.CPS.end_cont)
 
             globals.cps = cps
         } catch (e) {
