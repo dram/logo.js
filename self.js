@@ -42,10 +42,16 @@ Self.add_child = function (obj, child)
 Self.trait = function (parents, props)
 {
     var obj = Self.clone(props)
+    var traits = [obj]
+
+    parents.forEach(function (p) {
+        traits = traits.concat(p.$traits)
+    })
 
     Object.defineProperties(obj, {
         $parents: { value: Self.clone(parents), enumerable: false },
-        $children: { value: [], enumerable: false }
+        $children: { value: [], enumerable: false },
+        $traits: { value: traits, enumerable: false }
     })
 
     Self.update_slots(obj)
@@ -53,6 +59,23 @@ Self.trait = function (parents, props)
     obj.$parents.forEach(function (p) { Self.add_child(p, obj) })
 
     return obj
+}
+
+Self.hastrait = function (obj, traits)
+{
+    if (typeof obj !== "object" || obj === null)
+        return false
+
+    var res = true
+
+    for (var i=0, l=traits.length; i < l; i++) {
+        if (obj.$traits.indexOf(traits[i]) == -1) {
+            res = false
+            break
+        }
+    }
+
+    return res
 }
 
 Self.prototype = function (trait, props)

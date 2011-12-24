@@ -29,7 +29,7 @@ window.prototypes = {}
 */
 traits.CPS = Self.trait([], {
     isCPS: function (obj) {
-        return Self.get_trait(obj) === traits.CPS
+        return Self.hastrait(obj, [traits.CPS])
     },
 
     step: function () {
@@ -799,15 +799,15 @@ traits.Lang = Self.trait([], {
 
             globals.cps = cps
         } catch (e) {
-            if (Self.get_trait(e) === traits.SyntaxError) {
+            if (Self.hastrait(e, [traits.SyntaxError])) {
                 logger.error(this._("SyntaxError: {0}", this._(e.message)))
                 if (e.token) {
                     logger.error(this._("  Line {0}: {1}",
                                         e.token.line, lines[e.token.line]))
                 }
-            } else if (Self.get_trait(e) === traits.NameError) {
+            } else if (Self.hastrait(e, [traits.NameError])) {
                 logger.error(this._("NameError: {0}", e.name))
-            } else if (Self.get_trait(e) === traits.RuntimeError) {
+            } else if (Self.hastrait(e, [traits.RuntimeError])) {
                 logger.error(this._("RuntimeError: '{0}'", e.message))
                 if (e.expr) {
                     logger.error(this._("  Line {0}: {1}",
@@ -825,15 +825,15 @@ traits.Lang = Self.trait([], {
             var tokens = this.tokenize(source)
             this.eval(tokens, globals.globals)
         } catch (e) {
-            if (Self.get_trait(e) === traits.SyntaxError) {
+            if (Self.hastrait(e, [traits.SyntaxError])) {
                 logger.error(this._("SyntaxError: {0}", this._(e.message)))
                 if (e.token) {
                     logger.error(this._("  Line {0}: {1}",
                                         e.token.line, lines[e.token.line]))
                 }
-            } else if (Self.get_trait(e) === traits.NameError) {
+            } else if (Self.hastrait(e, [traits.NameError])) {
                 logger.error(this._("NameError: {0}", e.name))
-            } else if (Self.get_trait(e) === traits.RuntimeError) {
+            } else if (Self.hastrait(e, [traits.RuntimeError])) {
                 logger.error(this._("RuntimeError: '{0}'", e.message))
                 if (e.expr) {
                     logger.error(this._("  Line {0}: {1}",
