@@ -865,7 +865,7 @@ traits.Lang = Self.trait([], {
 	    break
 	case 'APPLY':
 	    src += expr.name
-	    src += " " + expr.args.map(globals.lang.export_expr).join()
+	    src += " " + expr.args.map(globals.lang.export_expr).join(' ')
 	    src += "\n"
 	    break
 	case 'INFIX':
