@@ -66,16 +66,9 @@ Self.hastrait = function (obj, traits)
     if (typeof obj !== "object" || obj === null)
         return false
 
-    var res = true
-
-    for (var i=0, l=traits.length; i < l; i++) {
-        if (obj.$traits.indexOf(traits[i]) == -1) {
-            res = false
-            break
-        }
-    }
-
-    return res
+    return traits.some(function (trait) {
+        return obj.$traits.indexOf(trait) != -1
+    })
 }
 
 Self.prototype = function (trait, props)
