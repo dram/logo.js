@@ -1190,23 +1190,22 @@ globals.PrototypePanel = globals.Tile.extend({
         this.add_child(tile)
         y += tile.bounds.height + 30
 
-        var ops = ['+', '-', '*', '/']
+        var ops = ['+', '-', '*', '/', '<', '>', '=']
         var x = 0
         for (var i = 0; i < ops.length; ++i) {
             expr = prototypes.expr_infix.clone(ops[i])
-            var nil = prototypes.number.clone(0)
-            nil.parent = expr
-            expr.left = nil
-            var nil = prototypes.number.clone(0)
-            nil.parent = expr
-            expr.right = nil
+            expr.left = prototypes.number.clone(0)
+            expr.left.parent = expr
+            expr.right = prototypes.number.clone(0)
+            expr.right.parent = expr
+
             tile = new globals.ProtoTile(expr)
             tile.translate(x, y)
             x = (tile.bounds.width + 5) * ((i + 1) % 2)
             y += (tile.bounds.height + 5) * (i % 2)
             this.add_child(tile)
         }
-        y += 5
+        y += tile.bounds.height + 10
 
         tile = new globals.ProtoTile(prototypes.number.clone(0))
         tile.translate(0, y)

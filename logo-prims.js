@@ -54,6 +54,22 @@ globals.word_list = Self.clone(prototypes.word_list)
     globals.word_list.$add(word)
 
     word = Self.clone(prototypes.prim_word)
+    word.name = 'gt'
+    word.narg = 2
+    word.func = function (n1, n2) {
+        return prototypes.boolean.clone(n1.value > n2.value)
+    }
+    globals.word_list.$add(word)
+
+    word = Self.clone(prototypes.prim_word)
+    word.name = 'eq'
+    word.narg = 2
+    word.func = function (n1, n2) {
+        return prototypes.boolean.clone(n1.value == n2.value)
+    }
+    globals.word_list.$add(word)
+
+    word = Self.clone(prototypes.prim_word)
     word.name = 'multiple'
     word.narg = 2
     word.func = function (n1, n2) {
