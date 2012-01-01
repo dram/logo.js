@@ -848,14 +848,14 @@ globals.ApplyTile = globals.Tile.extend({
         name.set_position(new paper.Point(x, 5))
 
         x += name.bounds.width + this.SPACING
-
-        for (var i = 0; i < expr.args.length; ++i) {
-            var p = expr.args[i].tile()
+        var y = 0
+        expr.args.forEach(function (arg) {
+            var p = arg.tile()
             p.set_background('#F7F9FE', 5)
-            p.set_position(new paper.Point(x, 0))
-            x += p.bounds.width + this.SPACING
+            p.set_position(new paper.Point(x, y))
+            y += p.bounds.height + this.SPACING
             this.add_child(p)
-        }
+        }, this)
 
         this.set_background('#CBDBE0', 5)
     },
