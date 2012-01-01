@@ -12,6 +12,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 "use strict"
 
+globals.colors = {
+    apply: '#BED600',
+    number: 'white',
+    argument: 'white',
+    control: '#808CD6',
+    list: '#D9F1FB',
+    infix: '#FFB612',
+    to: '#DDDDDD',
+    to_name: 'white',
+    to_variable: 'white',
+    to_delete: 'white',
+    button: '#FF6E00',
+}
+
 traits.Source = Self.trait([], {
     expressions: null,
 
@@ -193,7 +207,7 @@ globals.Tile = globals.HitGroup.extend({
         this.expr = expr
     },
 
-    SPACING: 12,
+    SPACING: 3,
 
     /**
        label -- translate tile label
@@ -274,7 +288,15 @@ globals.Tile = globals.HitGroup.extend({
         var rect = new paper.Path.Rectangle(
             bounds.point.subtract(point), bounds.size.add(size))
 
-        rect.fillColor = color
+        var c1 = new paper.Color(color)
+        var c2 = c1.clone()
+        c2.lightness = c1.lightness * 1.25
+        var gradient = new paper.Gradient([c2, c1], 'radial')
+
+        rect.fillColor = new paper.GradientColor(gradient,
+                                                 rect.bounds.topLeft,
+                                                 rect.bounds.bottomRight)
+
         this.insertChild(0, rect)
     },
 
@@ -328,7 +350,7 @@ globals.NewToTile = globals.Tile.extend({
         this.base()
         var name = new globals.Text(this.label('TO'), '#FFFFF')
         this.add_child(name)
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     create_description_dialog: function () {
@@ -430,23 +452,27 @@ globals.NewToTile = globals.Tile.extend({
 })
 
 globals.ProtoTile = globals.Tile.extend({
-    initialize: function (expr, color) {
+    initialize: function (expr) {
         this.base(expr)
-        this.color = color
+        var color = globals.colors.apply
 
         var label = null
         switch (expr.type) {
         case 'APPLY':
             label = expr.name
+            if (expr.name == 'repeat' || expr.name == 'ifelse')
+                color = globals.colors.control
             break
         case 'LIST':
             label = this.label('list')
+            color = globals.colors.list
             break
         case 'NUMBER':
             label = this.label('number')
             break
         case 'INFIX':
             label = this.label(expr.op)
+            color = globals.colors.infix
             break
         case 'TO':
             label = this.label('TO')
@@ -457,12 +483,11 @@ globals.ProtoTile = globals.Tile.extend({
 
         this.add_child(name)
 
-        color = color || '#CBDBE0'
         this.set_background(color, 5)
     },
 
     clone: function () {
-	var tile = new globals.ProtoTile(this.expr, this.color)
+	var tile = new globals.ProtoTile(this.expr)
 	tile.position = this.position
 	return tile
     },
@@ -494,7 +519,7 @@ globals.RunTile = globals.Tile.extend({
 
         this.add_child(label)
 
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     click_cb: function (expr) {
@@ -517,7 +542,7 @@ globals.StopTile = globals.Tile.extend({
 
         this.add_child(label)
 
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     click_cb: function (expr) {
@@ -539,7 +564,7 @@ globals.PauseTile = globals.Tile.extend({
 
         this.add_child(label)
 
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     click_cb: function (expr) {
@@ -571,7 +596,7 @@ globals.StepTile = globals.Tile.extend({
 
         this.add_child(label)
 
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     click_cb: function (expr) {
@@ -602,7 +627,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 
         this.add_child(label)
 
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     create_source_textarea: function () {
@@ -698,8 +723,8 @@ globals.SpeedTile = globals.Tile.extend({
 globals.NumberTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
-        this.add_child(new globals.Text(expr.value.toString(), '#C1CC25'))
-        this.set_background('#F7F9FE', 1)
+        this.add_child(new globals.Text(expr.value.toString()))
+        this.set_background(globals.colors.number, this.SPACING)
     },
 
     on_drop: function (tile) {
@@ -805,13 +830,12 @@ globals.ListTile = globals.Tile.extend({
         }
 
         var blank = new paper.Path.Rectangle(
-            new paper.Point(0, 0), new paper.Size(80, 10))
-        blank.fillColor = '#DCE8EB'
+            new paper.Point(0, 0), new paper.Size(100, y == 0 ? 30 : 18))
         blank.translate(
             blank.bounds.size.divide(2).add(new paper.Point(0, y)))
         this.add_child(blank)
 
-        this.set_background('#DCE8EB', 5)
+        this.set_background(globals.colors.list)
 
 	if (expr.parent.type == 'LIST')
             this.set_background('#F7F9FE', 5)
@@ -845,19 +869,21 @@ globals.ApplyTile = globals.Tile.extend({
 
         var x = 0
 
-        name.set_position(new paper.Point(x, 5))
+        name.set_position(new paper.Point(x, this.SPACING))
 
         x += name.bounds.width + this.SPACING
         var y = 0
         expr.args.forEach(function (arg) {
             var p = arg.tile()
-            p.set_background('#F7F9FE', 5)
             p.set_position(new paper.Point(x, y))
             y += p.bounds.height + this.SPACING
             this.add_child(p)
         }, this)
 
-        this.set_background('#CBDBE0', 5)
+        if (expr.name == 'repeat' || expr.name == 'ifelse')
+            this.set_background(globals.colors.control, this.SPACING)
+        else
+            this.set_background(globals.colors.apply, this.SPACING)
     },
 
     on_drop: function (tile) {
@@ -874,7 +900,7 @@ globals.ToVariableTile = globals.Tile.extend({
 	this.variable_name = name
         this.base(prototypes.variable.clone(name))
         this.add_child(new globals.Text(name, '#91897E'))
-        this.set_background('#F7F9FE', 5)
+        this.set_background(globals.colors.to_name, this.SPACING)
     },
 
     clone: function () {
@@ -905,7 +931,7 @@ globals.ToNameTile = globals.Tile.extend({
         this.base(expr)
 
         this.add_child(new globals.Text(name))
-        this.set_background('#F7F9FE', 5)
+        this.set_background(globals.colors.to_name, this.SPACING)
     },
 
     clone: function () {
@@ -970,7 +996,7 @@ globals.ToDeleteTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
         this.add_child(new globals.Text('x', '#F37C78'))
-        this.set_background('#F7F9FE', 6, 0)
+        this.set_background(globals.colors.to_delete, 6, 0)
     },
 
     click_cb: function () {
@@ -982,12 +1008,12 @@ globals.ToTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
 
-        var x = 0
+        var x = this.SPACING
 
         if (expr.name != globals.main_word_name) {
             var to = new globals.Text(this.label('TO'), "#91897E")
 
-            to.set_position(new paper.Point(x, 5))
+            to.set_position(new paper.Point(x, this.SPACING * 2))
 
             this.add_child(to)
 
@@ -1011,18 +1037,18 @@ globals.ToTile = globals.Tile.extend({
         var b = this.bounds
         var p = expr.block.tile()
         p.set_position(new paper.Point(this.SPACING * 2,
-				       b.y + b.height + this.SPACING))
+				       b.y + b.height + this.SPACING * 2))
         this.add_child(p)
 
         if (expr.name != globals.main_word_name) {
             var del = new globals.ToDeleteTile(expr)
             del.set_position(new paper.Point(
-                Math.max(this.bounds.width - 20, x), 5))
+                Math.max(this.bounds.width - 20, x), this.SPACING))
             this.add_child(del)
         }
 
         if (expr.name != globals.main_word_name) {
-            this.set_background('#ECF1F2', 5)
+            this.set_background(globals.colors.to, 3)
         }
     },
 })
@@ -1030,8 +1056,8 @@ globals.ToTile = globals.Tile.extend({
 globals.VariableTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
-        this.add_child(new globals.Text(expr.name.toString(), '#91897E'))
-        this.set_background('#F7F9FE')
+        this.add_child(new globals.Text(expr.name.toString()))
+        this.set_background(globals.colors.argument, this.SPACING)
     },
 
     on_drag_end: function (overlap) {
@@ -1073,7 +1099,7 @@ globals.InfixTile = globals.Tile.extend({
         var x = 0
 
         var left = expr.left.tile()
-        left.set_background('#F7F9FE', 5)
+        left.set_background('white', 2)
         left.set_position(new paper.Point(x, 0))
         this.add_child(left)
 
@@ -1086,11 +1112,11 @@ globals.InfixTile = globals.Tile.extend({
         x += op.bounds.width + this.SPACING
 
         var right = expr.right.tile()
-        right.set_background('#F7F9FE', 5)
+        right.set_background('white', 2)
         right.set_position(new paper.Point(x, 0))
         this.add_child(right)
 
-        this.set_background('#CBDBE0', 5)
+        this.set_background(globals.colors.infix, this.SPACING)
     },
 
     on_drag_end: function (overlap) {
@@ -1218,10 +1244,10 @@ globals.PrototypePanel = globals.Tile.extend({
         y += tile.bounds.height + 10
         this.add_child(tile)
 
-        var words = [ [this.label('forward'), [prototypes.number.clone(0)]]
+        var words = [ [this.label('repeat'), [prototypes.number.clone(0), prototypes.list.clone(0)]]
+	              , [this.label('ifelse'), [prototypes.nil.clone(0), prototypes.list.clone(0), prototypes.list.clone(0)]]
+                      , [this.label('forward'), [prototypes.number.clone(0)]]
 		      , [this.label('right'), [prototypes.number.clone(0)]]
-		      , [this.label('repeat'), [prototypes.number.clone(0), prototypes.list.clone(0)]]
-		      , [this.label('ifelse'), [prototypes.nil.clone(0), prototypes.list.clone(0), prototypes.list.clone(0)]]
 		      , [this.label('penup'), []]
 		      , [this.label('pendown'), []]
 		    ]
