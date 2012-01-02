@@ -131,19 +131,14 @@ globals.word_list = Self.clone(prototypes.word_list)
             var cps = Self.clone(prototypes.cps)
             cps.expr = expr
 
-            if (n > 1) {
-                cps.next = function (c) {
-                    return block.value(env, c)
-                }
-                cps.continuation = function (v) {
+            cps.next = function (c) { return block.value(env, c) }
+            cps.continuation = function (v) {
+                if (n > 1)
                     return rec(n - 1, block)
-                }
-            } else {
-                cps.next = function (c) {
-                    return block.value(env, c)
-                }
-                cps.continuation = cont
+                else
+                    return cont(v)
             }
+
             return cps
         }
 
