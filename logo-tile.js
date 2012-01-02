@@ -78,7 +78,7 @@ traits.Source = Self.trait([], {
             return parent.delete_child(expr)
 	} else if (parent && parent.replace_child) {
 	    this.auto_save(this.export())
-	    return parent.replace_child(expr, prototypes.nil.clone())
+	    return parent.replace_child(expr, prototypes.number.clone(0))
 	} else {
 	    return false
 	}
@@ -1221,11 +1221,6 @@ globals.PrototypePanel = globals.Tile.extend({
             this.add_child(tile)
         }
         y += tile.bounds.height + 10
-
-        tile = new globals.ProtoTile(prototypes.number.clone(0))
-        tile.translate(0, y)
-        y += tile.bounds.height + 10
-        this.add_child(tile)
 
         var words = [ [this.label('repeat'), [prototypes.number.clone(0), prototypes.list.clone(0)]]
 	              , [this.label('ifelse'), [prototypes.nil.clone(0), prototypes.list.clone(0), prototypes.list.clone(0)]]
