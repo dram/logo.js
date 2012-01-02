@@ -489,7 +489,7 @@ globals.ProtoTile = globals.Tile.extend({
     },
 
     clone: function () {
-	var tile = new globals.ProtoTile(this.expr)
+	var tile = new globals.ProtoTile(this.expr.clone())
 	tile.position = this.position
 	return tile
     },
