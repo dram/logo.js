@@ -24,6 +24,7 @@ globals.colors = {
     to_variable: 'white',
     to_delete: 'white',
     button: '#FF6E00',
+    highlight: '#FF6E00',
 }
 
 traits.Source = Self.trait([], {
@@ -336,7 +337,7 @@ Self.add_slot(traits.Expr, "tile", function () {
         var bounds = tile.bounds
 
         var border = new paper.Path.Rectangle(bounds.point, bounds.size)
-        border.strokeColor = '#F37C78'
+        border.strokeColor = globals.colors.highlight
         border.strokeWidth = 3
 
         tile.add_child(border)
@@ -580,7 +581,7 @@ globals.ContinueTile = globals.Tile.extend({
 
         this.add_child(label)
 
-        this.set_background('#F37C78', 5)
+        this.set_background(globals.colors.button, 5)
     },
 
     click_cb: function (expr) {
