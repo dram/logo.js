@@ -1019,7 +1019,8 @@ globals.InfixOpSelectorOpTile = globals.Tile.extend({
         this.infix_expr = expr
         this.selector_tile = selector
         this.add_child(new globals.Text(op, 'white'))
-        this.set_background(globals.colors.infix_op, this.SPACING)
+        this.set_background(globals.colors.infix_op,
+                            this.SPACING * 2, this.SPACING)
     },
 
     click_cb: function () {
@@ -1056,7 +1057,8 @@ globals.InfixOpTile = globals.Tile.extend({
         this.expr = expr
         this.infix_tile = infix_tile
         this.add_child(new globals.Text(expr.op, 'white'))
-        this.set_background(globals.colors.infix_op, this.SPACING)
+        this.set_background(globals.colors.infix_op,
+                            this.SPACING * 2, this.SPACING)
     },
 
     click_cb: function () {
@@ -1205,8 +1207,15 @@ globals.PrototypePanel = globals.Tile.extend({
         }
         y += tile.bounds.height + 10
 
+        var ifelse_arg = prototypes.expr_infix.clone(ops[i])
+        ifelse_arg.op = '='
+        ifelse_arg.left = prototypes.number.clone(0)
+        ifelse_arg.left.parent = expr
+        ifelse_arg.right = prototypes.number.clone(0)
+        ifelse_arg.right.parent = expr
+
         var words = [ [this.label('repeat'), [prototypes.number.clone(0), prototypes.list.clone(0)]]
-	              , [this.label('ifelse'), [prototypes.nil.clone(0), prototypes.list.clone(0), prototypes.list.clone(0)]]
+	              , [this.label('ifelse'), [ifelse_arg, prototypes.list.clone(0), prototypes.list.clone(0)]]
                       , [this.label('forward'), [prototypes.number.clone(0)]]
 		      , [this.label('right'), [prototypes.number.clone(0)]]
 		      , [this.label('penup'), []]
