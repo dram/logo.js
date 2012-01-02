@@ -509,6 +509,8 @@ globals.UserWordTile = globals.ProtoTile.extend({
                     to_expr.hide = !to_expr.hide
             }
         }
+
+        globals.source_canvas.redraw()
     }
 })
 
@@ -1016,20 +1018,18 @@ globals.InfixTile = globals.Tile.extend({
         var x = 0
 
         var left = expr.left.tile()
-        left.set_background('white', 2)
         left.set_position(new paper.Point(x, 0))
         this.add_child(left)
 
         x += left.bounds.width + this.SPACING
 
         var op = new globals.Text(expr.op.toString(), '#91897E')
-        op.set_position(new paper.Point(x, 5))
+        op.set_position(new paper.Point(x, this.SPACING))
         this.add_child(op)
 
         x += op.bounds.width + this.SPACING
 
         var right = expr.right.tile()
-        right.set_background('white', 2)
         right.set_position(new paper.Point(x, 0))
         this.add_child(right)
 
