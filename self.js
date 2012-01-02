@@ -63,7 +63,7 @@ Self.trait = function (parents, props)
 
 Self.hastrait = function (obj, traits)
 {
-    if (typeof obj !== "object" || obj === null)
+    if (typeof obj !== "object" || obj === null || !obj.$traits)
         return false
 
     return traits.some(function (trait) {
