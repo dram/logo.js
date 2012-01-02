@@ -852,9 +852,9 @@ globals.ToNameTile = globals.Tile.extend({
 
         var expr = prototypes.expr_apply.clone(name)
         for (var i = 0, l = to_expr.arg_names.length; i < l; ++i) {
-            var nil = prototypes.nil.clone()
-            nil.parent = expr
-            expr.args.push(nil)
+            var num = prototypes.number.clone(0)
+            num.parent = expr
+            expr.args.push(num)
         }
 
         this.base(expr)
@@ -1274,11 +1274,11 @@ globals.UserWordPanel = globals.Tile.extend({
 
             var expr = prototypes.expr_apply.clone(to_expr.name)
             for (var i = 0; i < to_expr.arg_names.length; ++i) {
-                var nil = prototypes.nil.clone()
-                nil.parent = expr
-                expr.args.push(nil)
+                var num = prototypes.number.clone(0)
+                num.parent = expr
+                expr.args.push(num)
             }
-            var tile = new globals.UserWordTile(expr, '#C1CC25')
+            var tile = new globals.UserWordTile(expr)
             tile.translate(0, y)
             y += tile.bounds.height + 10
             if (to_expr.hide)
