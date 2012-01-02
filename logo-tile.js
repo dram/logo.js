@@ -836,17 +836,6 @@ globals.ListTile = globals.Tile.extend({
         this.add_child(blank)
 
         this.set_background(globals.colors.list)
-
-	if (expr.parent.type == 'LIST')
-            this.set_background('#F7F9FE', 5)
-
-	/* List is not draggable if it is a block of a to expression. */
-	if (expr.parent.type == 'TO')
-	    this.on_drag_end = undefined
-    },
-
-    on_drag_end: function (overlap) {
-	return this.replace_self(overlap)
     },
 
     on_drop: function (tile) {
@@ -1238,12 +1227,6 @@ globals.PrototypePanel = globals.Tile.extend({
         y += tile.bounds.height + 10
         this.add_child(tile)
 
-
-        tile = new globals.ProtoTile(prototypes.list.clone(0))
-        tile.translate(0, y)
-        y += tile.bounds.height + 10
-        this.add_child(tile)
-
         var words = [ [this.label('repeat'), [prototypes.number.clone(0), prototypes.list.clone(0)]]
 	              , [this.label('ifelse'), [prototypes.nil.clone(0), prototypes.list.clone(0), prototypes.list.clone(0)]]
                       , [this.label('forward'), [prototypes.number.clone(0)]]
@@ -1359,7 +1342,7 @@ traits.SourceCanvas = Self.trait([], {
 	} else {
 	    var tile = that.get_focus_tile(event)
 
-	    if (!tile)
+	    if (!tile || tile instanceof globals.ListTile)
 		return
 
             var expr = tile.expr
