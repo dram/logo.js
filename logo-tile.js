@@ -1321,7 +1321,7 @@ globals.SourcePanel = globals.Tile.extend({
 traits.SourceCanvas = Self.trait([], {
     on_mouse_down: function (event) {
         var that = globals.source_canvas
-	that.drag_data = {}
+	that.drag_data = { clicked: true }
     },
 
     on_mouse_drag: function (event) {
@@ -1331,6 +1331,11 @@ traits.SourceCanvas = Self.trait([], {
 	if (data.start) {
             data.tile.translate(event.delta)
 	} else {
+            if (!data.clicked)
+                return
+
+            data.clicked = false
+
 	    var tile = that.get_focus_tile(event)
 
 	    if (!tile
