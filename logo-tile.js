@@ -129,7 +129,7 @@ globals.Text = paper.PointText.extend({
         this.base()
         this.content = content
 	this.characterStyle = {
-	    font: 'Microsoft YaHei',
+	    font: 'Consolas, monospace, Microsoft YaHei',
 	    fontSize: 12,
 	    fillColor: color
 	}
@@ -139,7 +139,7 @@ globals.Text = paper.PointText.extend({
 	if (!globals.text_width_calculator) {
 	    document.body.appendChild(document.createElement("br"))
 	    var span = document.createElement("span")
-	    span.style.font = "12pt Microsoft YaHei"
+	    span.style.font = "12pt Consolas, monospace, Microsoft YaHei"
 	    span.style.visibility = "hidden"
 	    span.style.position = "absolute"
 	    span.style.padding = "0"
