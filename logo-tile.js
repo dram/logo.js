@@ -1029,7 +1029,6 @@ globals.InfixOpSelectorOpTile = globals.Tile.extend({
 
     click_cb: function () {
         this.infix_expr.op = this.op
-        this.selector_tile.remove()
         globals.source_canvas.redraw()
     },
 })
@@ -1067,6 +1066,7 @@ globals.InfixOpTile = globals.Tile.extend({
 
     click_cb: function () {
         var tile = new globals.InfixOpSelectorTile(this.expr)
+        globals.source_canvas.remove_after_redraw.push(tile)
         tile.position.x = this.position.x
         tile.position.y = this.position.y + this.bounds.height
     },
@@ -1503,6 +1503,12 @@ traits.SourceCanvas = Self.trait([], {
         globals.user_word_panel.redraw()
 
         globals.source_panel.redraw()
+
+        this.remove_after_redraw.forEach(function (tile) {
+            tile.remove()
+        })
+
+        this.remove_after_redraw = []
     },
 
     draw_source: function () {
@@ -1550,7 +1556,8 @@ traits.SourceCanvas = Self.trait([], {
 
 prototypes.source_canvas = Self.prototype(traits.SourceCanvas, {
     drag_layer: null,
-    main_layer: null
+    main_layer: null,
+    remove_after_redraw: []
 })
 
 globals.source.import(globals.sample)
