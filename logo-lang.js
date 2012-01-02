@@ -270,8 +270,10 @@ traits.ExprApply = Self.trait([traits.Expr], {
             obj.name = name
         obj.args = []
 	if (this.args)
-	    for (var i = 0, l = this.args.length; i < l; ++i)
+	    for (var i = 0, l = this.args.length; i < l; ++i) {
 		obj.args[i] = this.args[i].clone()
+                obj.args[i].parent = obj
+            }
         return obj
     },
 
