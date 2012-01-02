@@ -535,6 +535,7 @@ globals.RunTile = globals.Tile.extend({
         globals.running = true
 	globals.source.run()
         paper.project.layers[0].activate()
+        globals.controller_panel.redraw()
     },
 })
 
@@ -557,6 +558,7 @@ globals.StopTile = globals.Tile.extend({
         globals.running = false
         globals.init_drawing_area()
         paper.project.layers[0].activate()
+        globals.controller_panel.redraw()
     },
 })
 
@@ -573,6 +575,7 @@ globals.PauseTile = globals.Tile.extend({
 
     click_cb: function (expr) {
         globals.paused = !globals.paused
+        globals.controller_panel.redraw()
     },
 })
 
@@ -589,6 +592,7 @@ globals.ContinueTile = globals.Tile.extend({
 
     click_cb: function (expr) {
         globals.paused = !globals.paused
+        globals.controller_panel.redraw()
     },
 })
 
@@ -620,6 +624,7 @@ globals.StepTile = globals.Tile.extend({
         }
 
         paper.project.layers[0].activate()
+        globals.source_canvas.redraw()
     },
 })
 
