@@ -313,7 +313,7 @@ traits.ExprApply = Self.trait([traits.Expr], {
     },
 
     replace_child: function (old, nu) {
-        nu = Self.clone(nu)
+        nu = nu.clone()
         nu.parent = this
 
         var index = this.args.indexOf(old)
@@ -341,6 +341,14 @@ traits.ExprInfix = Self.trait([traits.Expr], {
         var obj = Self.clone(this)
 	if (op)
             obj.op = op
+        if (this.left) {
+            obj.left = this.left.clone()
+            obj.left.parent = obj
+        }
+        if (this.right) {
+            obj.right = this.right.clone()
+            obj.right.parent = obj
+        }
         return obj
     },
 
