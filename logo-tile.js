@@ -21,7 +21,7 @@ globals.colors = {
     infix: '#FFB612',
     infix_op: '#CD930E',
     to: '#DDDDDD',
-    to_name: 'white',
+    to_name: '#98AC00',
     to_variable: 'white',
     to_delete: 'white',
     button: '#FF6E00',
@@ -828,8 +828,8 @@ globals.ToVariableTile = globals.Tile.extend({
     initialize: function (name) {
 	this.variable_name = name
         this.base(prototypes.variable.clone(name))
-        this.add_child(new globals.Text(name, '#91897E'))
-        this.set_background(globals.colors.to_name, this.SPACING)
+        this.add_child(new globals.Text(name))
+        this.set_background(globals.colors.variable, this.SPACING)
     },
 
     clone: function () {
@@ -859,8 +859,7 @@ globals.ToNameTile = globals.Tile.extend({
 
         this.base(expr)
 
-        this.add_child(new globals.Text(name))
-        this.set_background(globals.colors.to_name, this.SPACING)
+        this.add_child(new globals.Text(name, globals.colors.to_name))
     },
 
     clone: function () {
@@ -940,16 +939,16 @@ globals.ToTile = globals.Tile.extend({
         var x = this.SPACING
 
         if (expr.name != globals.main_word_name) {
-            var to = new globals.Text(this.label('TO'), "#91897E")
+            var to = new globals.Text(this.label('TO'))
 
             to.set_position(new paper.Point(x, this.SPACING * 2))
 
             this.add_child(to)
 
-            x += to.bounds.width + this.SPACING
+            x += to.bounds.width + this.SPACING * 2
 
             var name = new globals.ToNameTile(expr)
-            name.set_position(new paper.Point(x, 0))
+            name.set_position(new paper.Point(x, this.SPACING))
             this.add_child(name)
 
             x += name.bounds.width + this.SPACING * 2
@@ -977,7 +976,7 @@ globals.ToTile = globals.Tile.extend({
         }
 
         if (expr.name != globals.main_word_name) {
-            this.set_background(globals.colors.to, 3)
+            this.set_background(globals.colors.to, this.SPACING, this.SPACING * 2)
         }
     },
 })
