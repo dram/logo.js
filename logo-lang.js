@@ -888,6 +888,11 @@ traits.Lang = Self.trait([], {
 	case 'VARIABLE':
 	    src += expr.name
 	    break
+        case 'LIST':
+	    src += "[\n" + expr.data.map(function (e) {
+		return globals.lang.export_expr(e)
+	    }).join(" ") + " ]\n"
+            break
 	default:
 	}
 
