@@ -798,6 +798,10 @@ globals.ApplyTile = globals.Tile.extend({
             p.set_position(new paper.Point(x, y))
             y += p.bounds.height + this.SPACING
             this.add_child(p)
+
+            if (expr.name == 'ifelse' && arg.type == 'INFIX') {
+                p.non_draggable = true
+            }
         }, this)
 
         if (expr.name == 'repeat' || expr.name == 'ifelse')
@@ -1190,7 +1194,7 @@ globals.PrototypePanel = globals.Tile.extend({
         this.add_child(tile)
         y += tile.bounds.height + 30
 
-        var ops = ['+', '-', '*', '/', '<', '>', '=']
+        var ops = ['+', '-', '*', '/']
         var x = 0
         for (var i = 0; i < ops.length; ++i) {
             expr = prototypes.expr_infix.clone(ops[i])
@@ -1329,7 +1333,9 @@ traits.SourceCanvas = Self.trait([], {
 	} else {
 	    var tile = that.get_focus_tile(event)
 
-	    if (!tile || tile instanceof globals.ListTile)
+	    if (!tile
+                || tile.non_draggable
+                || tile instanceof globals.ListTile)
 		return
 
             var expr = tile.expr
@@ -1340,8 +1346,10 @@ traits.SourceCanvas = Self.trait([], {
 		data.start =  true
 		data.tile = tile.clone()
             } else if (tile instanceof globals.InfixOpTile) {
-		data.start =  true
-		data.tile = tile.infix_tile
+                if (!tile.infix_tile.non_draggable) {
+		    data.start =  true
+		    data.tile = tile.infix_tile
+                }
 	    } else if (expr && expr.parent && expr.parent.type != 'TO') {
 		data.start = true
 		data.tile = tile
