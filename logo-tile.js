@@ -724,7 +724,8 @@ globals.SpeedTile = globals.Tile.extend({
 globals.NumberTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
-        this.add_child(new globals.Text(expr.value.toString()))
+        this.text = new globals.Text(expr.value.toString())
+        this.add_child(this.text)
         this.set_background(globals.colors.number, this.SPACING)
     },
 
@@ -736,84 +737,10 @@ globals.NumberTile = globals.Tile.extend({
 	return this.replace_self(overlap)
     },
 
-    create_input_dialog: function () {
-	var form, input
-
-	form = document.createElement('form')
-	form.id = "input-num-dialog"
-	form.visibility = "hidden"
-	form.style.margin = "auto"
-	form.style.left = "0"
-	form.style.right = "0"
-	form.style.top = "0"
-	form.style.bottom = "0"
-	form.style.position = "absolute"
-	form.style.width = "200px"
-	form.style.height = "80px"
-	form.style.color = "#333333"
-	form.style.border = "#F7F9FE 5px solid"
-	form.style.background = "#DCE8EB"
-	form.style.padding = "10px"
-	form.style.textAlign = "center"
-
-	input = document.createElement('input')
-	input.name = "value"
-	input.style.margin = "10px"
-	input.style.width = "180px"
-	form.appendChild(input)
-
-	input = document.createElement('input')
-	input.type = "submit"
-	input.value = this.label('OK')
-	input.style.color = "#333333"
-	input.style.margin = "10px"
-	input.style.border = "#F7F9FE 0px solid"
-	form.appendChild(input)
-
-	input = document.createElement('input')
-	input.type = "button"
-	input.value = this.label('Cancel')
-	input.style.color = "#333333"
-	input.style.margin = "10px"
-	input.style.border = "#F7F9FE 0px solid"
-	input.onclick = function () {
-	     this.parentNode.style.visibility = 'hidden'
-	}
-	form.appendChild(input)
-
-	document.body.appendChild(form)
-	return form
-    },
-
     click_cb: function () {
-        var form
-
-	if (!(form = document.getElementById('input-num-dialog')))
-	    form = this.create_input_dialog()
-
-        var input = form.elements['value']
-
-        input.value = this.expr.value
-        form.style.visibility = 'visible'
-        console.log(this.expr.value)
-
-        var expr = this.expr
-
-        form.onsubmit = function () {
-            var value = input.value
-            if (!value)
-                return false
-            expr.value = parseInt(value, 10)
-            form.style.visibility = 'hidden'
-            document.activeElement.blur()
-            globals.source_canvas.redraw()
-            paper.view.draw()
-
-            return false
-        }
-
-        input.focus()
-        input.select()
+        globals.number_input_status = true
+        globals.number_input_focus = this
+        this.text.content = '|'
     },
 })
 
@@ -1393,17 +1320,41 @@ traits.SourceCanvas = Self.trait([], {
 
             if (focus && focus.on_drop)
 		focus.on_drop(source)
+
+            that.redraw()
         } else {
             if (focus && focus.click_cb) {
                 focus.click_cb()
             }
 	}
-
-        that.redraw()
     },
 
     on_key_down: function (event) {
         if (document.activeElement !== document.body) {
+            return
+        }
+
+        if (globals.number_input_status) {
+            var tile = globals.number_input_focus
+            switch (event.key) {
+            case 'enter':
+                tile.expr.value = parseInt(tile.text.content, 10)
+                globals.number_input_status = false
+		globals.source_canvas.redraw()
+                break
+            case 'escape':
+                globals.number_input_status = false
+		globals.source_canvas.redraw()
+                break
+            case 'backspace':
+                tile.text.content = tile.text.content.slice(0,-2) + '|'
+                break
+	    case '0': case '1': case '2': case '3':
+	    case '4': case '5': case '6': case '7':
+	    case '8': case '9':
+                tile.text.content = tile.text.content.slice(0,-1) + event.key + '|'
+	        break
+            }
             return
         }
 
