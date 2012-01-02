@@ -19,6 +19,7 @@ globals.colors = {
     control: '#808CD6',
     list: '#D9F1FB',
     infix: '#FFB612',
+    infix_op: '#CD930E',
     to: '#DDDDDD',
     to_name: 'white',
     to_variable: 'white',
@@ -1011,6 +1012,60 @@ globals.ParenTile = globals.Tile.extend({
     },
 })
 
+globals.InfixOpSelectorOpTile = globals.Tile.extend({
+    initialize: function (op, expr, selector) {
+        this.base()
+        this.op = op
+        this.infix_expr = expr
+        this.selector_tile = selector
+        this.add_child(new globals.Text(op, 'white'))
+        this.set_background(globals.colors.infix_op, this.SPACING)
+    },
+
+    click_cb: function () {
+        this.infix_expr.op = this.op
+        this.selector_tile.remove()
+        globals.source_canvas.redraw()
+    },
+})
+
+globals.InfixOpSelectorTile = globals.Tile.extend({
+    initialize: function (expr) {
+        this.base()
+
+        if (['+', '-', '*', '/'].indexOf(expr.op) != -1)
+            var ops = ['+', '-', '*', '/']
+        else
+            var ops = ['<', '>', '=']
+
+        var x = 0
+        ops.forEach(function (op) {
+            var t = new globals.InfixOpSelectorOpTile(op, expr, this)
+            t.set_position(new paper.Point(x, 0))
+            x += t.bounds.width + this.SPACING
+            this.add_child(t)
+        }, this)
+
+        this.set_background(globals.colors.infix_op)
+    },
+})
+
+globals.InfixOpTile = globals.Tile.extend({
+    initialize: function (expr, infix_tile) {
+        this.base()
+        this.expr = expr
+        this.infix_tile = infix_tile
+        this.add_child(new globals.Text(expr.op, 'white'))
+        this.set_background(globals.colors.infix_op, this.SPACING)
+    },
+
+    click_cb: function () {
+        var tile = new globals.InfixOpSelectorTile(this.expr)
+        tile.position.x = this.position.x
+        tile.position.y = this.position.y + this.bounds.height
+    },
+})
+
 globals.InfixTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
@@ -1021,13 +1076,13 @@ globals.InfixTile = globals.Tile.extend({
         left.set_position(new paper.Point(x, 0))
         this.add_child(left)
 
-        x += left.bounds.width + this.SPACING
+        x += left.bounds.width + this.SPACING * 2
 
-        var op = new globals.Text(expr.op.toString(), '#91897E')
-        op.set_position(new paper.Point(x, this.SPACING))
+        var op = new globals.InfixOpTile(expr, this)
+        op.set_position(new paper.Point(x, 0))
         this.add_child(op)
 
-        x += op.bounds.width + this.SPACING
+        x += op.bounds.width + this.SPACING * 2
 
         var right = expr.right.tile()
         right.set_position(new paper.Point(x, 0))
@@ -1275,6 +1330,9 @@ traits.SourceCanvas = Self.trait([], {
 		|| tile instanceof globals.ToNameTile) {
 		data.start =  true
 		data.tile = tile.clone()
+            } else if (tile instanceof globals.InfixOpTile) {
+		data.start =  true
+		data.tile = tile.infix_tile
 	    } else if (expr && expr.parent && expr.parent.type != 'TO') {
 		data.start = true
 		data.tile = tile
