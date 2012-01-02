@@ -88,8 +88,13 @@ traits.Source = Self.trait([], {
 
     replace_expression: function (old, nu) {
 	/* parent and child can not be displaced */
-	if (old.parent === nu || nu.parent === old)
-	    return false
+        for (var p = old.parent; p; p = p.parent)
+            if (p === nu)
+                return false
+
+        for (var p = nu.parent; p; p = p.parent)
+            if (p === old)
+                return false
 
 	/*
 	  Do not replace by a list or word definition, so that drag a
