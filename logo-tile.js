@@ -795,7 +795,7 @@ globals.ListTile = globals.Tile.extend({
 
         tile.expr.parent = this.expr
 
-        this.expr.data.push(tile.expr.clone())
+        this.expr.data.push(tile.expr)
 
         return true
     },
