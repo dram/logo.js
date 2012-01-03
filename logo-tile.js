@@ -451,7 +451,6 @@ globals.NewToTile = globals.Tile.extend({
             document.activeElement.blur()
             form.style.visibility = 'hidden'
             globals.source_canvas.redraw()
-            paper.view.draw()
 
             return false
         }
@@ -689,7 +688,6 @@ globals.ViewSourceTile = globals.Tile.extend({
 	    globals.source.import(src)
 	    this.parentNode.style.visibility = 'hidden'
             globals.source_canvas.redraw()
-            paper.view.draw()
 	}
 	div.appendChild(save)
 
@@ -924,7 +922,6 @@ globals.ToNameTile = globals.Tile.extend({
             form.style.visibility = 'hidden'
             document.activeElement.blur()
             globals.source_canvas.redraw()
-            paper.view.draw()
 
             return false
         }
