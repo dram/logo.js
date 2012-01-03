@@ -782,7 +782,12 @@ globals.ListTile = globals.Tile.extend({
             blank.bounds.size.divide(2).add(new paper.Point(0, y)))
         this.add_child(blank)
 
-        this.set_background(globals.colors.list)
+        if (expr.parent && expr.parent.type == 'TO') {
+            var s = Math.max(300 - this.bounds.width, 0) / 2
+            this.set_background(globals.colors.list, s)
+        } else {
+            this.set_background(globals.colors.list)
+        }
     },
 
     on_drop: function (tile) {
