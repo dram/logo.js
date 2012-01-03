@@ -152,7 +152,7 @@ globals.Text = paper.PointText.extend({
         this.base()
         this.content = content
 	this.characterStyle = {
-	    font: 'Consolas, monospace, Microsoft YaHei',
+	    font: 'Consolas, Microsoft YaHei',
 	    fontSize: 12,
 	    fillColor: color
 	}
@@ -162,7 +162,7 @@ globals.Text = paper.PointText.extend({
 	if (!globals.text_width_calculator) {
 	    document.body.appendChild(document.createElement("br"))
 	    var span = document.createElement("span")
-	    span.style.font = "12pt Consolas, monospace, Microsoft YaHei"
+	    span.style.font = "12pt Consolas, Microsoft YaHei"
 	    span.style.visibility = "hidden"
 	    span.style.position = "absolute"
 	    span.style.padding = "0"
@@ -668,14 +668,13 @@ globals.ViewSourceTile = globals.Tile.extend({
 
 	text = document.createElement('textarea')
 	text.style.color = "#333333"
-	text.style.font = "11pt Consolas"
+	text.style.font = "11pt Consolas, Microsoft YaHei"
 	text.style.border = globals.colors.to + " 5px solid"
 	text.style.background = globals.colors.list
 	text.style.overflow = "auto"
 	text.style.padding = "10px"
-	text.style.width = "400px"
-	text.style.height = "300px"
-	text.style.boxSizing = "border-box"
+	text.style.width = "370px"
+	text.style.height = "270px"
 	div.appendChild(text)
 
 	div.appendChild(document.createElement('br'))
