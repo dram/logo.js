@@ -445,8 +445,8 @@ globals.NewToTile = globals.Tile.extend({
             }
             exprs.splice(i, 0, expr)
 
-            form.style.visibility = 'hidden'
             document.activeElement.blur()
+            form.style.visibility = 'hidden'
             globals.source_canvas.redraw()
             paper.view.draw()
 
