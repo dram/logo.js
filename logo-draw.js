@@ -81,7 +81,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
       , 'right'
       , 'penup'
       , 'pendown'
-      , 'repeat'].forEach(function (word) {
+      , 'repeat'
+      , 'ifelse'].forEach(function (word) {
 	if (globals.keywords && globals.keywords[word])
 	    globals.word_list.$add_alias(word, globals.keywords[word])
     })
