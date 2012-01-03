@@ -313,6 +313,9 @@ globals.Tile = globals.HitGroup.extend({
        Delete self if `tile' is null
     */
     replace_self: function (tile) {
+        if (tile instanceof globals.ListTile && this.expr.type != 'APPLY')
+            return false
+
 	if (!tile || !tile.expr)
 	    return globals.source.remove_expression(this.expr)
 	else
@@ -781,11 +784,16 @@ globals.ListTile = globals.Tile.extend({
 
     on_drop: function (tile) {
         if (tile.expr.parent === this.expr)
-            return
+            return false
+
+        if (tile.expr.type != 'APPLY')
+            return false
 
         tile.expr.parent = this.expr
 
         this.expr.data.push(tile.expr.clone())
+
+        return true
     },
 })
 
