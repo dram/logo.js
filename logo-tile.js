@@ -340,6 +340,9 @@ Self.add_slot(traits.Expr, "tile", function () {
         'INFIX': globals.InfixTile
     }[this.type]
 
+    if (this.type == 'TO' && this.name == globals.main_word_name)
+        TileType = globals.MainToTile
+
     var tile = new TileType(this)
 
     if (this === globals.current_expression) {
@@ -945,27 +948,37 @@ globals.ToDeleteTile = globals.Tile.extend({
     }
 })
 
+globals.MainToTile = globals.Tile.extend({
+    initialize: function (expr) {
+        this.base(expr)
+
+        var tile = expr.block.tile()
+        
+        tile.set_position(new paper.Point(this.SPACING * 2, this.SPACING * 2))
+
+        this.add_child(tile)
+    },
+})
+
 globals.ToTile = globals.Tile.extend({
     initialize: function (expr) {
         this.base(expr)
 
         var x = this.SPACING
 
-        if (expr.name != globals.main_word_name) {
-            var to = new globals.Text(this.label('TO'))
+        var to = new globals.Text(this.label('TO'))
 
-            to.set_position(new paper.Point(x, this.SPACING * 2))
+        to.set_position(new paper.Point(x, this.SPACING * 2))
 
-            this.add_child(to)
+        this.add_child(to)
 
-            x += to.bounds.width + this.SPACING * 2
+        x += to.bounds.width + this.SPACING * 2
 
-            var name = new globals.ToNameTile(expr)
-            name.set_position(new paper.Point(x, this.SPACING))
-            this.add_child(name)
+        var name = new globals.ToNameTile(expr)
+        name.set_position(new paper.Point(x, this.SPACING))
+        this.add_child(name)
 
-            x += name.bounds.width + this.SPACING * 2
-        }
+        x += name.bounds.width + this.SPACING * 2
 
         for (var i = 0; i < expr.arg_names.length; ++i) {
             var t = new globals.ToVariableTile(expr.arg_names[i])
@@ -981,16 +994,12 @@ globals.ToTile = globals.Tile.extend({
 				       b.y + b.height + this.SPACING * 2))
         this.add_child(p)
 
-        if (expr.name != globals.main_word_name) {
-            var del = new globals.ToDeleteTile(expr)
-            del.set_position(new paper.Point(
-                Math.max(this.bounds.width - 20, x), this.SPACING))
-            this.add_child(del)
-        }
+        var del = new globals.ToDeleteTile(expr)
+        del.set_position(new paper.Point(
+            Math.max(this.bounds.width - 20, x), this.SPACING))
+        this.add_child(del)
 
-        if (expr.name != globals.main_word_name) {
-            this.set_background(globals.colors.to, this.SPACING, this.SPACING * 2)
-        }
+        this.set_background(globals.colors.to, this.SPACING, this.SPACING * 2)
     },
 })
 
