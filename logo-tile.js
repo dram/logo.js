@@ -947,6 +947,7 @@ globals.ToDeleteTile = globals.Tile.extend({
 
     click_cb: function () {
 	globals.source.remove_expression(this.expr)
+        globals.source_canvas.redraw()
     }
 })
 
