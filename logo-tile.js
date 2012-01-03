@@ -565,6 +565,7 @@ globals.StopTile = globals.Tile.extend({
         layer.activate()
 
         globals.running = false
+        globals.paused = false
         globals.current_expression = null
         globals.init_drawing_area()
         paper.project.layers[0].activate()
