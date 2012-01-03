@@ -380,9 +380,7 @@ globals.NewToTile = globals.Tile.extend({
 	form.style.position = "absolute"
 	form.style.width = "200px"
 	form.style.height = "80px"
-	form.style.color = "#333333"
-	form.style.border = "#F7F9FE 5px solid"
-	form.style.background = "#DCE8EB"
+	form.style.background = globals.colors.list
 	form.style.padding = "10px"
 	form.style.textAlign = "center"
 
@@ -395,17 +393,13 @@ globals.NewToTile = globals.Tile.extend({
 	input = document.createElement('input')
 	input.type = "submit"
 	input.value = this.label('OK')
-	input.style.color = "#333333"
 	input.style.margin = "10px"
-	input.style.border = "#F7F9FE 0px solid"
 	form.appendChild(input)
 
 	input = document.createElement('input')
 	input.type = "button"
 	input.value = this.label('Cancel')
-	input.style.color = "#333333"
 	input.style.margin = "10px"
-	input.style.border = "#F7F9FE 0px solid"
 	input.onclick = function () {
 	     this.parentNode.style.visibility = 'hidden'
 	}
@@ -657,7 +651,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 	div.id = "source"
 	div.visibility = "hidden"
 	div.style.margin = "auto"
-	div.style.background = "#DCE8EB"
+	div.style.background = globals.colors.to
 	div.style.left = "0"
 	div.style.right = "0"
 	div.style.top = "0"
@@ -670,8 +664,8 @@ globals.ViewSourceTile = globals.Tile.extend({
 	text = document.createElement('textarea')
 	text.style.color = "#333333"
 	text.style.font = "11pt Consolas"
-	text.style.border = "#DCE8EB 5px solid"
-	text.style.background = "#F7F9FE"
+	text.style.border = globals.colors.to + " 5px solid"
+	text.style.background = globals.colors.list
 	text.style.overflow = "auto"
 	text.style.padding = "10px"
 	text.style.width = "400px"
@@ -683,9 +677,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 
 	var save = document.createElement('button')
 	save.innerHTML = this.label('Save')
-	save.style.color = "#333333"
 	save.style.margin = "10px"
-	save.style.border = "#F7F9FE 0px solid"
 	save.onclick = function () {
 	    var src = this.parentNode.firstChild.value
 	    globals.source.import(src)
@@ -697,9 +689,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 
 	var cancel = document.createElement('button')
 	cancel.innerHTML = this.label('Cancel')
-	cancel.style.color = "#333333"
 	cancel.style.margin = "10px"
-	cancel.style.border = "#F7F9FE 0px solid"
 	cancel.onclick = function () {
 	    this.parentNode.style.visibility = 'hidden'
 	}
@@ -736,7 +726,7 @@ globals.SpeedTile = globals.Tile.extend({
         label.translate(x, 0)
         this.add_child(label)
 
-        this.set_background('#CBDBE0', 5)
+        this.set_background(globals.colors.to, 5)
     },
 })
 
