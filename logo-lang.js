@@ -479,6 +479,13 @@ traits.WordList = Self.trait([], {
 prototypes.word_list = Self.prototype(traits.WordList, {})
 
 traits.Lang = Self.trait([], {
+    trans_keyword: function (key) {
+	if (globals.keywords && globals.keywords[key])
+	    return globals.keywords[key]
+	else
+	    return key
+    },
+
     tokenize: function (src) {
         var list = Self.clone(prototypes.token_list)
         var tokens = []
@@ -488,14 +495,8 @@ traits.Lang = Self.trait([], {
         var space_or_bracket = /[ \t\n\[\];]/
         var delimiters = /[ \t\n\[\]\(\);]|$/
         var delimiters_and_infix_ops = /[ \t\n\[\]\(\);\+\-\*\/\=\<\>]|$/
-        var to_tokens = ['to']
-        var end_tokens = ['end']
-	if (globals.keywords) {
-	    if (globals.keywords['to'])
-		to_tokens.push(globals.keywords['to'])
-	    if (globals.keywords['end'])
-		end_tokens.push(globals.keywords['end'])
-	}
+        var to_tokens = ['to', this.trans_keyword('to')]
+        var end_tokens = ['end', this.trans_keyword('end')]
         var idx = 0
         var line = 0
         var chr = null
@@ -860,12 +861,8 @@ traits.Lang = Self.trait([], {
 
 	switch (expr.type) {
 	case 'TO':
-	    var to = 'to'
-	    var end = 'end'
-	    if (globals.keywords) {
-		to = globals.keywords['to'] || 'to'
-		end = globals.keywords['end'] || 'end'
-	    }
+	    var to = this.trans_keyword('to')
+	    var end = this.trans_keyword('end')
 	    src += to + ' ' + expr.name
 	    src += ' ' + expr.arg_names.join(' ') + "\n"
 	    expr.block.data.forEach(function (e) {
