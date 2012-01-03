@@ -919,8 +919,8 @@ globals.ToNameTile = globals.Tile.extend({
                 return ':' + arg
             })
 
-            form.style.visibility = 'hidden'
             document.activeElement.blur()
+            form.style.visibility = 'hidden'
             globals.source_canvas.redraw()
 
             return false
