@@ -470,7 +470,8 @@ globals.ProtoTile = globals.Tile.extend({
         switch (expr.type) {
         case 'APPLY':
             label = expr.name
-            if (expr.name == 'repeat' || expr.name == 'ifelse')
+            if (expr.name == this.label('repeat')
+                || expr.name == this.label('ifelse'))
                 color = globals.colors.control
             break
         case 'LIST':
@@ -818,12 +819,13 @@ globals.ApplyTile = globals.Tile.extend({
             y += p.bounds.height + this.SPACING
             this.add_child(p)
 
-            if (expr.name == 'ifelse' && arg.type == 'INFIX') {
+            if (expr.name == this.label('ifelse') && arg.type == 'INFIX') {
                 p.non_draggable = true
             }
         }, this)
 
-        if (expr.name == 'repeat' || expr.name == 'ifelse')
+        if (expr.name == this.label('repeat')
+            || expr.name == this.label('ifelse'))
             this.set_background(globals.colors.control, this.SPACING)
         else
             this.set_background(globals.colors.apply, this.SPACING)
