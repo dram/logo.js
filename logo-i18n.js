@@ -73,29 +73,14 @@ globals.keywords = {
 
 globals.sample = {
     "zh-cn": "\
-定义 多边形 :边长\n\
-前进 :边长\n\
-右转 90\n\
-多边形 :边长 + 5\n\
-结束\n\
 定义 主程序\n\
-多边形 5\n\
 结束\n\
 主程序",
 }[globals.locale]
 
 if (!globals.sample)
     globals.sample = "\
-to polygon :edge\n\
-  forward :edge\n\
-  right 90\n\
-  ifelse :edge < 100\n\
-  [ polygon :edge + 5 ]\n\
-  [ ]\n\
-end\n\
-\n\
 to main\n\
-  polygon 5\n\
 end\n\
 main"
 

@@ -1280,10 +1280,10 @@ globals.UserWordPanel = globals.Tile.extend({
             if (to_expr.type != 'TO')
                 return
 
-            globals.user_defined_words.push(to_expr)
-
             if (to_expr.name === globals.main_word_name)
                 return
+
+            globals.user_defined_words.push(to_expr)
 
             var expr = prototypes.expr_apply.clone(to_expr.name)
             for (var i = 0; i < to_expr.arg_names.length; ++i) {
@@ -1330,8 +1330,12 @@ globals.SourcePanel = globals.Tile.extend({
         })
 
         this.translate(new paper.Point(- this.bounds.x, 0))
-        this.translate(new paper.Point(
-            globals.user_word_panel.bounds.x - this.bounds.width - 30, 0))
+        if (globals.user_defined_words.length == 0)
+            var neigh = globals.prototype_panel
+        else
+            var neigh = globals.user_word_panel
+        this.translate(
+            new paper.Point(neigh.bounds.x - this.bounds.width - 30, 30))
     },
 })
 
