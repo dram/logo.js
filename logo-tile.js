@@ -114,6 +114,22 @@ traits.Source = Self.trait([], {
 	}
     },
 
+    add_user_word: function (name, args) {
+        var expr = prototypes.expr_to.clone(name)
+        expr.arg_names = args.map(function (arg) { return ':' + arg })
+
+        var exprs = globals.source.expressions
+
+        var i = 0
+        for (; i < exprs.length; ++i) {
+            if (exprs[i].type != 'TO'
+                || exprs[i].name == globals.main_word_name)
+                break
+        }
+
+        exprs.splice(i, 0, expr)
+    },
+
     run: function () {
         globals.lang.run_expr(this.expressions, globals.logger)
     },
@@ -430,20 +446,7 @@ globals.NewToTile = globals.Tile.extend({
             if (items.length < 1)
                 return false
 
-            var expr = prototypes.expr_to.clone(items[0])
-            expr.arg_names = items.slice(1).map(function (arg) {
-                return ':' + arg
-            })
-
-            var exprs = globals.source.expressions
-
-            var i = 0
-            for (; i < exprs.length; ++i) {
-                if (exprs[i].type != 'TO'
-                    || exprs[i].name == globals.main_word_name)
-                    break
-            }
-            exprs.splice(i, 0, expr)
+            globals.source.add_user_word(items[0], items.slice(1))
 
             document.activeElement.blur()
             form.style.visibility = 'hidden'
