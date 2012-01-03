@@ -861,18 +861,14 @@ traits.Lang = Self.trait([], {
 
 	switch (expr.type) {
 	case 'TO':
-	    var to = this.trans_keyword('to')
-	    var end = this.trans_keyword('end')
-	    src += to + ' ' + expr.name
-	    src += ' ' + expr.arg_names.join(' ') + "\n"
-	    expr.block.data.forEach(function (e) {
-		src += "  " + globals.lang.export_expr(e)
-	    })
-	    src += end + "\n"
+	    src += [ this.trans_keyword('to'),
+                     expr.name ].concat(expr.arg_names).join(' ') + "\n"
+	    src += expr.block.data.map(globals.lang.export_expr).join(' ')
+	    src += this.trans_keyword('end') + "\n"
 	    break
 	case 'APPLY':
-	    src += expr.name
-	    src += " " + expr.args.map(globals.lang.export_expr).join(' ')
+	    src += [ expr.name ].concat(
+                expr.args.map(globals.lang.export_expr)).join(' ')
 	    src += "\n"
 	    break
 	case 'INFIX':
@@ -896,7 +892,7 @@ traits.Lang = Self.trait([], {
 	    src += expr.name
 	    break
         case 'LIST':
-	    src += "[\n" + expr.data.map(function (e) {
+	    src += "[ " + expr.data.map(function (e) {
 		return globals.lang.export_expr(e)
 	    }).join(" ") + " ]\n"
             break
