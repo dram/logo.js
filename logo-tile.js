@@ -149,39 +149,13 @@ globals.Text = paper.PointText.extend({
     initialize: function (content, color) {
         color = color || '#333333'
 
-        this.base()
+        paper.PointText.call(this)
         this.content = content
 	this.characterStyle = {
 	    font: 'Consolas, Microsoft YaHei',
-	    fontSize: 12,
+	    fontSize: 16,
 	    fillColor: color
 	}
-    },
-
-    _getBounds: function (getter, cacheName, args) {
-	if (!globals.text_width_calculator) {
-	    document.body.appendChild(document.createElement("br"))
-	    var span = document.createElement("span")
-	    span.style.font = "12pt Consolas, Microsoft YaHei"
-	    span.style.visibility = "hidden"
-	    span.style.position = "absolute"
-	    span.style.padding = "0"
-	    span.style.width = "auto"
-	    document.body.appendChild(span)
-	    globals.text_width_calculator = span
-	} else {
-	    var span = globals.text_width_calculator
-	}
-
-        span.innerHTML = this.content
-
-        var w = span.offsetWidth
-        var h = span.offsetHeight
-
-        var p = this.point
-        var bounds = paper.Rectangle.create(p.x, p.y - h * 0.75, w, h)
-
-        return getter == 'getBounds' ? this._createBounds(bounds) : bounds
     },
 
     set_position: function (pos) {
@@ -197,8 +171,8 @@ globals.Text = paper.PointText.extend({
 */
 globals.HitGroup = paper.Group.extend({
     hitTest: function (point, options, matrix) {
-        options = HitResult.getOptions(point, options)
-        point = options.point
+	point = paper.Point.read(arguments)
+	options = paper.HitResult.getOptions(paper.Base.read(arguments))
 
         if (this._children) {
             for (var i = this._children.length - 1; i >= 0; i--) {
@@ -226,7 +200,7 @@ globals.HitGroup = paper.Group.extend({
 */
 globals.Tile = globals.HitGroup.extend({
     initialize: function (expr) {
-        this.base()
+        globals.HitGroup.call(this)
         this.expr = expr
     },
 
@@ -247,9 +221,9 @@ globals.Tile = globals.HitGroup.extend({
 
        Test hit for children firstly, and then self.
     */
-    hitTest: function (point, options, matrix) {
-        options = HitResult.getOptions(point, options)
-        point = options.point
+    hitTest: function (point, options) {
+	point = paper.Point.read(arguments)
+	options = paper.HitResult.getOptions(paper.Base.read(arguments))
 
 	/* test for children */
 	var children = this._children
@@ -257,7 +231,7 @@ globals.Tile = globals.HitGroup.extend({
         if (children) {
             for (var i = children.length - 1; i >= 0; i--) {
                 if (children[i] instanceof globals.HitGroup
-		    && (result = children[i].hitTest(point, options, matrix)))
+		    && (result = children[i].hitTest(point, options)))
 		    break
             }
         }
@@ -267,14 +241,14 @@ globals.Tile = globals.HitGroup.extend({
 	/* test for self */
         var bounds = this.getBounds()
 
-        var top_left = bounds.getTopLeft().transform(matrix)
-        var bottom_right = bounds.getBottomRight().transform(matrix)
+        var top_left = bounds.getTopLeft()
+        var bottom_right = bounds.getBottomRight()
 
         if (point.x >= top_left.x
             && point.x <= bottom_right.x
             && point.y >= top_left.y
             && point.y <= bottom_right.y) {
-            return new HitResult('center', this,
+            return new paper.HitResult('center', this,
                                  { name: paper.Base.hyphenate('Center'),
                                    point: point })
         } else {
@@ -376,7 +350,7 @@ Self.add_slot(traits.Expr, "tile", function () {
 
 globals.NewToTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
         var name = new globals.Text(this.label('TO'), '#FFFFF')
         this.add_child(name)
         this.set_background(globals.colors.button, 5)
@@ -462,7 +436,7 @@ globals.NewToTile = globals.Tile.extend({
 
 globals.ProtoTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
         var color = globals.colors.apply
 
         var label = null
@@ -525,7 +499,7 @@ globals.UserWordTile = globals.ProtoTile.extend({
 
 globals.RunTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var label = new globals.Text(this.label('start'), '#FFFFFF')
 
@@ -549,7 +523,7 @@ globals.RunTile = globals.Tile.extend({
 
 globals.StopTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var label = new globals.Text(this.label('stop'), '#FFFFFF')
 
@@ -574,7 +548,7 @@ globals.StopTile = globals.Tile.extend({
 
 globals.PauseTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var label = new globals.Text(this.label('pause'), '#FFFFFF')
 
@@ -591,7 +565,7 @@ globals.PauseTile = globals.Tile.extend({
 
 globals.ContinueTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var label = new globals.Text(this.label('continue'), '#FFFFFF')
 
@@ -608,7 +582,7 @@ globals.ContinueTile = globals.Tile.extend({
 
 globals.StepTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var label = new globals.Text(this.label('step'), '#FFFFFF')
 
@@ -640,7 +614,7 @@ globals.StepTile = globals.Tile.extend({
 
 globals.ViewSourceTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var label = new globals.Text(this.label('source'), '#FFFFFF')
 
@@ -716,7 +690,7 @@ globals.ViewSourceTile = globals.Tile.extend({
 
 globals.SpeedTile = globals.Tile.extend({
     initialize: function () {
-        this.base()
+        globals.Tile.call(this)
 
         var x = 0
 
@@ -735,7 +709,7 @@ globals.SpeedTile = globals.Tile.extend({
 
 globals.NumberTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
         this.text = new globals.Text(expr.value.toString())
         this.add_child(this.text)
         this.set_background(globals.colors.number, this.SPACING)
@@ -758,7 +732,7 @@ globals.NumberTile = globals.Tile.extend({
 
 globals.ListTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         var y = 0
 
@@ -800,7 +774,7 @@ globals.ListTile = globals.Tile.extend({
 
 globals.ApplyTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         var name = new globals.Text(expr.name)
 
@@ -842,7 +816,7 @@ globals.ApplyTile = globals.Tile.extend({
 globals.ToVariableTile = globals.Tile.extend({
     initialize: function (name) {
 	this.variable_name = name
-        this.base(prototypes.variable.clone(name))
+        globals.Tile.call(this, prototypes.variable.clone(name))
         this.add_child(new globals.Text(name))
         this.set_background(globals.colors.variable, this.SPACING)
     },
@@ -872,7 +846,7 @@ globals.ToNameTile = globals.Tile.extend({
             expr.args.push(num)
         }
 
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         this.add_child(new globals.Text(name, globals.colors.to_name))
     },
@@ -936,7 +910,7 @@ globals.ToNameTile = globals.Tile.extend({
  */
 globals.ToDeleteTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
         this.add_child(new globals.Text('x', '#F37C78'))
         this.set_background(globals.colors.to_delete, 6, 0)
     },
@@ -949,7 +923,7 @@ globals.ToDeleteTile = globals.Tile.extend({
 
 globals.MainToTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         var tile = expr.block.tile()
         
@@ -961,7 +935,7 @@ globals.MainToTile = globals.Tile.extend({
 
 globals.ToTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         var x = this.SPACING
 
@@ -1004,7 +978,7 @@ globals.ToTile = globals.Tile.extend({
 
 globals.VariableTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
         this.add_child(new globals.Text(expr.name.toString()))
         this.set_background(globals.colors.argument, this.SPACING)
     },
@@ -1020,7 +994,7 @@ globals.VariableTile = globals.Tile.extend({
 
 globals.NilTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
         this.add_child(new globals.Text('???', '#F37C78'))
         this.set_background('#F7F9FE')
     },
@@ -1036,14 +1010,14 @@ globals.NilTile = globals.Tile.extend({
 
 globals.ParenTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
         this.add_child(expr.expr.tile())
     },
 })
 
 globals.InfixOpSelectorOpTile = globals.Tile.extend({
     initialize: function (op, expr, selector) {
-        this.base()
+        globals.Tile.call(this)
         this.op = op
         this.infix_expr = expr
         this.selector_tile = selector
@@ -1060,7 +1034,7 @@ globals.InfixOpSelectorOpTile = globals.Tile.extend({
 
 globals.InfixOpSelectorTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base()
+        globals.Tile.call(this)
 
         if (['+', '-', '*', '/'].indexOf(expr.op) != -1)
             var ops = ['+', '-', '*', '/']
@@ -1081,7 +1055,7 @@ globals.InfixOpSelectorTile = globals.Tile.extend({
 
 globals.InfixOpTile = globals.Tile.extend({
     initialize: function (expr, infix_tile) {
-        this.base()
+        globals.Tile.call(this)
         this.expr = expr
         this.infix_tile = infix_tile
         this.add_child(new globals.Text(expr.op, 'white'))
@@ -1099,7 +1073,7 @@ globals.InfixOpTile = globals.Tile.extend({
 
 globals.InfixTile = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         var x = 0
 
@@ -1133,7 +1107,7 @@ globals.InfixTile = globals.Tile.extend({
 
 globals.ControllerPanel = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         this.redraw()
     },
@@ -1200,7 +1174,7 @@ globals.ControllerPanel = globals.Tile.extend({
 
 globals.PrototypePanel = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         this.redraw()
     },
@@ -1271,7 +1245,7 @@ globals.PrototypePanel = globals.Tile.extend({
 
 globals.UserWordPanel = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         this.redraw()
     },
@@ -1316,7 +1290,7 @@ globals.UserWordPanel = globals.Tile.extend({
 
 globals.SourcePanel = globals.Tile.extend({
     initialize: function (expr) {
-        this.base(expr)
+        globals.Tile.call(this, expr)
 
         this.redraw()
     },
