@@ -1288,6 +1288,18 @@ globals.UserWordPanel = globals.Tile.extend({
     },
 })
 
+globals.ScrollBarTile = globals.Tile.extend({
+    initialize: function (height) {
+        globals.Tile.call(this)
+
+        var blank = new paper.Path.Rectangle(
+            new paper.Point(0, 0), new paper.Size(17, height))
+
+        this.add_child(blank)
+        this.set_background(globals.colors.list, 0)
+    },
+})
+
 globals.SourcePanel = globals.Tile.extend({
     initialize: function (expr) {
         globals.Tile.call(this, expr)
@@ -1301,15 +1313,47 @@ globals.SourcePanel = globals.Tile.extend({
 
         var y = 20
 
+        var group = new globals.HitGroup()
+
+        that.add_child(group)
+
         globals.source.forEach (function (expr) {
             if (expr.type != 'TO' || expr.hide)
                 return
 
             var path = expr.tile()
             path.translate(new paper.Point(- path.bounds.x, y))
-            that.add_child(path)
+            group.addChild(path)
             y += path.bounds.height + 30
         })
+
+        var bounds = this.bounds
+
+        var delta = new paper.Point(- bounds.x, 0)
+
+        var height = (globals.canvas.height
+                      * globals.canvas.height / bounds.height)
+
+        if (bounds.height > globals.canvas.height) {
+            var scrollbar = new globals.ScrollBarTile(height)
+            scrollbar.translate(new paper.Point(bounds.width + 20, 15))
+            this.add_child(scrollbar)
+            scrollbar.onMouseDrag = function (event) {
+                var yold = scrollbar.position.y
+                var ymin = 35 + height / 2
+                var ymax = (globals.canvas.height - height / 2)
+                var y = Math.min(ymax,
+                                 Math.max(ymin, yold + event.delta.y))
+
+                scrollbar.position.y = y
+                group.position.y -= ((y - yold)
+                                     * globals.canvas.height / height * 2)
+            }
+        }
+
+        delta.x += globals.user_word_panel.bounds.x - this.bounds.width - 30
+
+        this.translate(delta)
 
         this.translate(new paper.Point(- this.bounds.x, 0))
         if (globals.user_defined_words.length == 0)
