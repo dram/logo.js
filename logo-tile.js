@@ -164,40 +164,14 @@ globals.Text = paper.PointText.extend({
 })
 
 /**
-   Override paper.Group's _hitTest function to only test hits for child
-   HitGroup items.
-
-   And this beheavior will be overrided by Tile.
-*/
-globals.HitGroup = paper.Group.extend({
-    _hitTest: function (point, options) {
-        if (this._children) {
-            for (var i = this._children.length - 1; i >= 0; i--) {
-                if (this._children[i] instanceof globals.HitGroup) {
-                    var res = this._children[i]._hitTest(point, options)
-                    if (res) return res
-                }
-            }
-        }
-
-        return null
-    },
-
-    set_position: function (pos) {
-        this.position = pos.add(this.bounds.size.divide(2))
-    },
-
-})
-
-/**
-   Tile base object, extended from HitGroup, so all tiles are groups.
+   Tile base object, extended from paper.Group, so all tiles are groups.
 
    Every tile has an `expr' attribute to hold log expression relate to
    this tile.
 */
-globals.Tile = globals.HitGroup.extend({
+globals.Tile = paper.Group.extend({
     initialize: function (expr) {
-        globals.HitGroup.call(this)
+        paper.Group.call(this)
         this.expr = expr
     },
 
@@ -224,7 +198,7 @@ globals.Tile = globals.HitGroup.extend({
 	var result = null
         if (children) {
             for (var i = children.length - 1; i >= 0; i--) {
-                if (children[i] instanceof globals.HitGroup
+                if (children[i] instanceof paper.Group
 		    && (result = children[i]._hitTest(point, options)))
 		    break
             }
@@ -289,6 +263,10 @@ globals.Tile = globals.HitGroup.extend({
                                                  rect.bounds.bottomRight)
 
         this.insertChild(0, rect)
+    },
+
+    set_position: function (pos) {
+        this.position = pos.add(this.bounds.size.divide(2))
     },
 
     /**
@@ -1307,7 +1285,7 @@ globals.SourcePanel = globals.Tile.extend({
 
         var y = 20
 
-        var group = new globals.HitGroup()
+        var group = new paper.Group()
 
         that.add_child(group)
 
