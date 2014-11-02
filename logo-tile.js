@@ -164,20 +164,17 @@ globals.Text = paper.PointText.extend({
 })
 
 /**
-   Override paper.Group's hitTest function to only test hits for child
+   Override paper.Group's _hitTest function to only test hits for child
    HitGroup items.
 
    And this beheavior will be overrided by Tile.
 */
 globals.HitGroup = paper.Group.extend({
-    hitTest: function (point, options, matrix) {
-	point = paper.Point.read(arguments)
-	options = paper.HitResult.getOptions(paper.Base.read(arguments))
-
+    _hitTest: function (point, options) {
         if (this._children) {
             for (var i = this._children.length - 1; i >= 0; i--) {
                 if (this._children[i] instanceof globals.HitGroup) {
-                    var res = this._children[i].hitTest(point, options, matrix)
+                    var res = this._children[i]._hitTest(point, options)
                     if (res) return res
                 }
             }
@@ -221,17 +218,14 @@ globals.Tile = globals.HitGroup.extend({
 
        Test hit for children firstly, and then self.
     */
-    hitTest: function (point, options) {
-	point = paper.Point.read(arguments)
-	options = paper.HitResult.getOptions(paper.Base.read(arguments))
-
+    _hitTest: function (point, options) {
 	/* test for children */
 	var children = this._children
 	var result = null
         if (children) {
             for (var i = children.length - 1; i >= 0; i--) {
                 if (children[i] instanceof globals.HitGroup
-		    && (result = children[i].hitTest(point, options)))
+		    && (result = children[i]._hitTest(point, options)))
 		    break
             }
         }
